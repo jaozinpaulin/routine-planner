@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 5mm 6mm;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background-color: #ffffff !important;
+        color: #18181b !important;
+    }
+
+    .print-avoid-break {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+}
