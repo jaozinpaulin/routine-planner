@@ -1,16 +1,25 @@
-# React + Vite
+#  Routine Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> Gerenciador minimalista de rotina e hábitos semanais focado em alta produtividade e clareza visual.
 
-Currently, two official plugins are available:
+O **Routine Planner** permite organizar o seu fluxo diário por meio de blocos de tempo rápidos e modais interativos via drag-and-drop. Conta com visualização ajustável (5 ou 7 dias), clonagem inteligente de cronogramas entre os dias da semana e suporte a exportação nativa em PDF perfeitamente diagramada em A4 paisagem (sem cortes ou elementos quebrados).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+##  Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Visualização Flexível**: Alterne instantaneamente entre visão de dias úteis (5 dias) ou semana completa (7 dias).
+- **Drag & Drop Rápido**: Arraste atividades predefinidas diretamente para qualquer dia da semana.
+- **Edição & Customização Inline**: Altere horários (início/fim), títulos e cores de cada atividade direto no card ou pelo modal.
+- **Replicação de Rotina**: Copie a rotina inteira de um dia para múltiplos outros com 1 clique.
+- **Exportação PDF Inteligente**: Layout adaptado para impressão em A4 paisagem via CSS Print, garantindo compactação máxima sem quebrar linhas indesejadas.
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 🛠️ Tecnologias
+
+- **React 19**
+- **Vite**
+- **Tailwind CSS**
+- **Lucide React** (Ícones)
+
