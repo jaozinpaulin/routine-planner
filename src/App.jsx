@@ -5,17 +5,17 @@ import DayColumn from './components/DayColumn';
 import CreateBlockModal from './components/CreateBlockModal';
 
 const DAYS_5 = [
-  { key: 'seg', label: 'Segunda-feira' },
-  { key: 'ter', label: 'Terça-feira' },
-  { key: 'qua', label: 'Quarta-feira' },
-  { key: 'qui', label: 'Quinta-feira' },
-  { key: 'sex', label: 'Sexta-feira' },
+  { key: 'seg', label: 'Segunda-feira', short: 'Seg' },
+  { key: 'ter', label: 'Terça-feira', short: 'Ter' },
+  { key: 'qua', label: 'Quarta-feira', short: 'Qua' },
+  { key: 'qui', label: 'Quinta-feira', short: 'Qui' },
+  { key: 'sex', label: 'Sexta-feira', short: 'Sex' },
 ];
 
 const DAYS_7 = [
   ...DAYS_5,
-  { key: 'sab', label: 'Sábado' },
-  { key: 'dom', label: 'Domingo' },
+  { key: 'sab', label: 'Sábado', short: 'Sáb' },
+  { key: 'dom', label: 'Domingo', short: 'Dom' },
 ];
 
 const INITIAL_SCHEDULE = {
@@ -31,6 +31,7 @@ const INITIAL_SCHEDULE = {
 export default function App() {
   const [daysCount, setDaysCount] = useState(5);
   const activeDays = daysCount === 5 ? DAYS_5 : DAYS_7;
+  const [mobileActiveDay, setMobileActiveDay] = useState('seg');
   const [schedule, setSchedule] = useState(INITIAL_SCHEDULE);
 
   const [modalState, setModalState] = useState({
@@ -43,7 +44,7 @@ export default function App() {
     window.print();
   };
 
-  // soltar bloco rapido na coluna
+  // Drop desktop
   const handleDropBlock = (dayKey, item) => {
     const newBlock = {
       id: `${item.id}-${Date.now()}`,
@@ -60,7 +61,12 @@ export default function App() {
     }));
   };
 
-  // abrir modal no dia selecionado
+  // Clique rápido (para celular ou desktop)
+  const handleQuickAdd = (item) => {
+    const targetDay = mobileActiveDay;
+    handleDropBlock(targetDay, item);
+  };
+
   const handleAddClick = (dayKey) => {
     const day = activeDays.find((d) => d.key === dayKey);
     setModalState({
@@ -70,7 +76,6 @@ export default function App() {
     });
   };
 
-  // salvar bloco do modal na coluna
   const handleSaveModalBlock = (newBlockData) => {
     if (!modalState.dayKey) return;
 
@@ -85,7 +90,6 @@ export default function App() {
     }));
   };
 
-  // edicao inline
   const handleUpdateBlock = (dayKey, blockId, updatedFields) => {
     setSchedule((prev) => ({
       ...prev,
@@ -102,7 +106,6 @@ export default function App() {
     }));
   };
 
-
   const handleClearDay = (dayKey) => {
     setSchedule((prev) => ({
       ...prev,
@@ -110,7 +113,6 @@ export default function App() {
     }));
   };
 
-  // copiar blocos d
   const handleCopySchedule = (sourceDayKey, targetDayKeys) => {
     const sourceBlocks = schedule[sourceDayKey] || [];
     if (sourceBlocks.length === 0) return;
@@ -127,47 +129,88 @@ export default function App() {
     });
   };
 
+  const currentDayInfo = activeDays.find((d) => d.key === mobileActiveDay) || activeDays[0];
+
   return (
-    <div className="min-h-screen bg-[#141416] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 print:p-0 print:bg-[#f7f7f5] antialiased">
-      <div className="w-full space-y-4 sm:space-y-5">
+    <div className="min-h-screen bg-[#141416] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 print:p-0 print:bg-white antialiased">
+      <div className="w-full space-y-3 sm:space-y-5">
         <Header
           daysCount={daysCount}
-          onDaysCountChange={setDaysCount}
+          onDaysCountChange={(count) => {
+            setDaysCount(count);
+            if (count === 5 && (mobileActiveDay === 'sab' || mobileActiveDay === 'dom')) {
+              setMobileActiveDay('seg');
+            }
+          }}
           onPrint={handlePrint}
         />
 
-        <BlockPickers />
+        <BlockPickers
+          onSelectBlock={handleQuickAdd}
+          activeDayLabel={currentDayInfo.short}
+        />
 
-        <div className="hidden print:block text-center py-2 mb-3 border-b border-zinc-300/80">
-          <h2 className="text-sm font-bold tracking-tight uppercase text-zinc-800">
+        {/* Barra de abas exclusiva para Mobile */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/60 border border-zinc-800/80 rounded-xl lg:hidden print:hidden overflow-x-auto">
+          {activeDays.map((d) => {
+            const isCurrent = d.key === mobileActiveDay;
+            const count = (schedule[d.key] || []).length;
+            return (
+              <button
+                key={d.key}
+                type="button"
+                onClick={() => setMobileActiveDay(d.key)}
+                className={`flex-1 min-w-[50px] py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all ${isCurrent
+                  ? 'bg-[#d97757] text-white shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
+                  }`}
+              >
+                <span>{d.short}</span>
+                {count > 0 && (
+                  <span className={`text-[9px] px-1 rounded-full ${isCurrent ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="hidden print:block text-center py-2 mb-2 border-b border-zinc-300">
+          <h2 className="text-xs font-bold tracking-wider uppercase text-zinc-800">
             Cronograma Semanal de Rotina
           </h2>
         </div>
 
         <main
-          className={`flex overflow-x-auto pb-4 gap-2.5 sm:gap-3 scrollbar-none xl:grid xl:overflow-visible xl:pb-0 ${daysCount === 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-7'
-            } print:grid print:overflow-visible print:pb-0 print:gap-1.5 print:w-full ${daysCount === 5 ? 'print:grid-cols-5' : 'print:grid-cols-7'
-            }`}
+          className={`w-full grid gap-2 sm:gap-3 
+            ${daysCount === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-7'} 
+            print:gap-1.5 ${daysCount === 5 ? 'print:grid-cols-5' : 'print:grid-cols-7'}
+          `}
         >
-          {activeDays.map((day) => (
-            <div
-              key={day.key}
-              className="min-w-[210px] xl:min-w-0 flex-1 print:min-w-0 print:w-full"
-            >
-              <DayColumn
-                dayKey={day.key}
-                dayLabel={day.label}
-                isWeekend={day.key === 'sab' || day.key === 'dom'}
-                blocks={schedule[day.key] || []}
-                onDropBlock={handleDropBlock}
-                onAddClick={handleAddClick}
-                onUpdateBlock={handleUpdateBlock}
-                onDeleteBlock={handleDeleteBlock}
-                onClearDay={handleClearDay}
-                onCopySchedule={handleCopySchedule}
-              />
-            </div>
-          ))}
+          {activeDays.map((day) => {
+            const isMobileHidden = day.key !== mobileActiveDay;
+
+            return (
+              <div
+                key={day.key}
+                className={`w-full ${isMobileHidden ? 'hidden lg:block print:block' : 'block'}`}
+              >
+                <DayColumn
+                  dayKey={day.key}
+                  dayLabel={day.label}
+                  isWeekend={day.key === 'sab' || day.key === 'dom'}
+                  blocks={schedule[day.key] || []}
+                  onDropBlock={handleDropBlock}
+                  onAddClick={handleAddClick}
+                  onUpdateBlock={handleUpdateBlock}
+                  onDeleteBlock={handleDeleteBlock}
+                  onClearDay={handleClearDay}
+                  onCopySchedule={handleCopySchedule}
+                />
+              </div>
+            );
+          })}
         </main>
       </div>
 
@@ -178,12 +221,12 @@ export default function App() {
         onSave={handleSaveModalBlock}
       />
 
-      <footer className="pt-8 pb-3 text-center print:hidden">
+      <footer className="pt-6 pb-2 text-center print:hidden">
         <a
           href="https://github.com/jaozinpaulin"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400/80 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
         >
           <span>github.com/jaozinpaulin</span>
         </a>

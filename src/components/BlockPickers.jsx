@@ -1,5 +1,5 @@
 import {
-    Bus, GraduationCap, Utensils, Briefcase, Moon, Dumbbell, BookOpen, Coffee, Gamepad2, Sparkles, Laptop, Bike, Music, Flame, Smile, Clock,
+    Bus, GraduationCap, Utensils, Briefcase, Moon, Dumbbell, BookOpen, Coffee, Gamepad2, Sparkles, Laptop, Bike, Music, Flame, Smile, Clock, Plus,
 } from 'lucide-react';
 
 export const ICONS = {
@@ -75,23 +75,22 @@ export const COLORS = {
 
 const INITIAL_ITEMS = [
     { id: 'sono', title: 'Descanso / Sono', icon: 'Moon', color: 'violet' },
-    { id: 'refeicao', title: 'Almoco / Janta', icon: 'Utensils', color: 'amber' },
-    { id: 'trajeto', title: 'Trajeto / Onibus', icon: 'Bus', color: 'emerald' },
+    { id: 'refeicao', title: 'Almoço / Janta', icon: 'Utensils', color: 'amber' },
+    { id: 'trajeto', title: 'Trajeto / Ônibus', icon: 'Bus', color: 'emerald' },
     { id: 'aula', title: 'Aula / Faculdade', icon: 'GraduationCap', color: 'orange' },
     { id: 'trabalho', title: 'Trabalho / Empresa', icon: 'Briefcase', color: 'indigo' },
     { id: 'estudo', title: 'Estudo / Foco', icon: 'BookOpen', color: 'cyan' },
-    { id: 'pausa', title: 'Pausa / Cafe', icon: 'Coffee', color: 'rose' },
-
+    { id: 'pausa', title: 'Pausa / Café', icon: 'Coffee', color: 'rose' },
     { id: 'treino', title: 'Treino / Academia', icon: 'Dumbbell', color: 'teal' },
-    { id: 'tarefas', title: 'Organizacao / Casa', icon: 'Sparkles', color: 'amber' },
+    { id: 'tarefas', title: 'Organização / Casa', icon: 'Sparkles', color: 'amber' },
     { id: 'leitura', title: 'Leitura / Estudo', icon: 'Laptop', color: 'indigo' },
     { id: 'pedal', title: 'Caminhada / Pedal', icon: 'Bike', color: 'emerald' },
     { id: 'social', title: 'Social / Amigos', icon: 'Smile', color: 'orange' },
     { id: 'lazer', title: 'Lazer / Games', icon: 'Gamepad2', color: 'rose' },
-    { id: 'musica', title: 'Relaxar / Musica', icon: 'Music', color: 'violet' },
+    { id: 'musica', title: 'Relaxar / Música', icon: 'Music', color: 'violet' },
 ];
 
-export default function BlockPickers() {
+export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
     const startDrag = (e, item) => {
         const theme = COLORS[item.color] || COLORS.orange;
         e.dataTransfer.setData('application/json', JSON.stringify({ ...item, theme }));
@@ -99,40 +98,46 @@ export default function BlockPickers() {
     };
 
     return (
-        <section className="bg-zinc-900/40 border border-zinc-800/70 p-3.5 sm:p-4 rounded-2xl mb-5 sm:mb-7 print:hidden">
+        <section className="bg-zinc-900/40 border border-zinc-800/70 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden">
             <div className="flex items-center justify-between mb-2.5 px-1">
                 <span className="text-xs font-semibold text-zinc-300">
-                    Blocos rapidos
+                    Blocos rápidos
                 </span>
-                <span className="text-[11px] text-zinc-500">
-                    Arraste para o dia desejado
+                <span className="text-[11px] text-zinc-500 hidden sm:inline">
+                    Arraste ou clique para adicionar {activeDayLabel ? `em ${activeDayLabel}` : ''}
+                </span>
+                <span className="text-[11px] text-orange-400/90 sm:hidden">
+                    Toque para adicionar {activeDayLabel ? `em ${activeDayLabel}` : ''}
                 </span>
             </div>
 
-            <div className="flex items-center gap-2.5 overflow-x-auto p-1 pb-6 [&::-webkit-scrollbar]:h-2.5 [&::-webkit-scrollbar-track]:bg-zinc-950/60 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700 cursor-pointer">                {INITIAL_ITEMS.map((item) => {
-                const IconComp = ICONS[item.icon] || ICONS.Sparkles;
-                const theme = COLORS[item.color] || COLORS.orange;
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
+                {INITIAL_ITEMS.map((item) => {
+                    const IconComp = ICONS[item.icon] || ICONS.Sparkles;
+                    const theme = COLORS[item.color] || COLORS.orange;
 
-                return (
-                    <div
-                        key={item.id}
-                        draggable
-                        onDragStart={(e) => startDrag(e, item)}
-                        className={`group relative shrink-0 min-w-[155px] h-[74px] p-3 flex flex-col justify-end overflow-hidden rounded-xl border transition-all cursor-grab active:cursor-grabbing hover:scale-[1.02] select-none ${theme.bg} ${theme.border}`}
-                    >
-                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-110">
-                            <IconComp
-                                strokeWidth={1.5}
-                                className={`w-10 h-10 opacity-60 group-hover:opacity-90 transition-opacity ${theme.icon}`}
-                            />
+                    return (
+                        <div
+                            key={item.id}
+                            draggable
+                            onDragStart={(e) => startDrag(e, item)}
+                            onClick={() => onSelectBlock && onSelectBlock(item)}
+                            className={`group relative p-2.5 flex items-center justify-between overflow-hidden rounded-xl border transition-all cursor-pointer active:scale-95 sm:hover:scale-[1.02] select-none ${theme.bg} ${theme.border}`}
+                        >
+                            <div className="flex items-center gap-2 min-w-0">
+                                <IconComp
+                                    strokeWidth={1.7}
+                                    className={`w-4 h-4 shrink-0 ${theme.icon}`}
+                                />
+                                <span className={`text-[11px] font-semibold leading-tight truncate ${theme.text}`}>
+                                    {item.title}
+                                </span>
+                            </div>
+
+                            <Plus className="w-3.5 h-3.5 text-zinc-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
                         </div>
-
-                        <span className={`relative z-10 text-xs font-semibold leading-tight pr-8 line-clamp-2 ${theme.text}`}>
-                            {item.title}
-                        </span>
-                    </div>
-                );
-            })}
+                    );
+                })}
             </div>
         </section>
     );
