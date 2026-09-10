@@ -102,8 +102,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                                 Início
                             </label>
                             <input
-                                type="text"
-                                inputMode="numeric"
+                                type="tel"
                                 maxLength={5}
                                 placeholder="00:00"
                                 value={start}
@@ -117,8 +116,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                                 Fim
                             </label>
                             <input
-                                type="text"
-                                inputMode="numeric"
+                                type="tel"
                                 maxLength={5}
                                 placeholder="00:00"
                                 value={end}

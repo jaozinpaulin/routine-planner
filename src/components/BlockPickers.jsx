@@ -154,18 +154,20 @@ export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay,
                 })}
             </div>
 
-            {/* Modal de Definição de Horários */}
+
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
-                    <div
-                        ref={modalRef}
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs overflow-y-auto"
+                    onFocus={(e) => e.stopPropagation()}
+                >
+                    <div ref={modalRef}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5"
+                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 my-auto transform-gpu max-h-[90vh] overflow-y-auto"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                                    {ActiveIcon && <ActiveIcon strokeWidth={1.8} className={`w-4 h-4 ${activeTheme.icon}`} />}
+                                    {ActiveIcon && <ActiveIcon strokeWidth={2} className={`w-4 h-4 ${activeTheme.icon}`} />}
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-semibold text-[#d97757] uppercase tracking-wider block">
