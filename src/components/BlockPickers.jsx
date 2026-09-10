@@ -181,14 +181,14 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
-            {/* Modal sem trepidação ao abrir teclado virtual */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 sm:items-center sm:pt-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs transition-opacity duration-200">
                     <div
                         ref={modalRef}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5"
-                    >
+                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 animate-in slide-in-from-bottom-6 duration-200 pb-8 sm:pb-5">
+                        <div className="w-10 h-1 bg-zinc-700/60 rounded-full mx-auto -mt-1.5 mb-2 sm:hidden" />
+
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
@@ -262,13 +262,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                 <button
                                     type="button"
                                     onClick={() => setEditingItem(null)}
-                                    className="flex-1 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"
+                                    className="flex-1 py-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-2 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                                    className="flex-1 py-2.5 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                                 >
                                     <Check className="w-4 h-4" />
                                     Adicionar

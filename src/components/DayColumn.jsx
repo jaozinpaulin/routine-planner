@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Check, Copy, Pin, GripVertical } from 'lucide-react';
+import { Plus, Trash2, Check, Copy, Pin } from 'lucide-react';
 import { ICONS, COLORS } from './BlockPickers';
 import { maskTimeInput, normalizeTime } from '../utils/time';
 
@@ -37,6 +37,11 @@ export default function DayColumn({
     const [dropPosition, setDropPosition] = useState(null);
 
     const copyMenuRef = useRef(null);
+
+    // Controle de Long Press para toque mobile
+    const longPressTimerRef = useRef(null);
+    const isTouchDraggingRef = useRef(false);
+    const touchStartPosRef = useRef({ x: 0, y: 0 });
     const touchStartIdxRef = useRef(null);
     const lastTargetIdxRef = useRef(null);
     const lastPlaceRef = useRef('after');
@@ -54,6 +59,9 @@ export default function DayColumn({
     }, [showCopyMenu]);
 
     const handleStartEdit = (block) => {
+        // Não abre modal de edição se estava no meio de um arrasto mobile
+        if (isTouchDraggingRef.current) return;
+
         setEditingId(block.id);
         setEditForm({
             title: block.title,
@@ -176,17 +184,43 @@ export default function DayColumn({
         handleDrop(e);
     };
 
-    // Touch Mobile
+    // Long Press Touch Mobile
     const handleTouchStart = (e, index) => {
+        const touch = e.touches[0];
+        touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
         touchStartIdxRef.current = index;
         lastTargetIdxRef.current = index;
         lastPlaceRef.current = 'after';
-        setDraggedCardIndex(index);
+        isTouchDraggingRef.current = false;
+
+        // Inicia temporizador de 250ms para ativar o arrasto
+        longPressTimerRef.current = setTimeout(() => {
+            isTouchDraggingRef.current = true;
+            setDraggedCardIndex(index);
+            if (navigator?.vibrate) {
+                navigator.vibrate(35); // Feedback tátil
+            }
+        }, 250);
     };
 
     const handleTouchMove = (e) => {
-        if (touchStartIdxRef.current === null) return;
         const touch = e.touches[0];
+
+        // Se ainda não ativou o drag e o usuário mexeu mais de 8px, cancela o timer (era scroll da tela)
+        if (!isTouchDraggingRef.current) {
+            const dx = Math.abs(touch.clientX - touchStartPosRef.current.x);
+            const dy = Math.abs(touch.clientY - touchStartPosRef.current.y);
+            if (dx > 8 || dy > 8) {
+                clearTimeout(longPressTimerRef.current);
+            }
+            return;
+        }
+
+        // Se já ativou o drag após o long-press, impede o scroll da página
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+
         const el = document.elementFromPoint(touch.clientX, touch.clientY);
         const cardEl = el ? el.closest('[data-card-index]') : null;
 
@@ -203,13 +237,22 @@ export default function DayColumn({
     };
 
     const handleTouchEnd = () => {
-        const fromIdx = touchStartIdxRef.current;
-        const toIdx = lastTargetIdxRef.current;
-        const place = lastPlaceRef.current;
+        clearTimeout(longPressTimerRef.current);
 
-        if (fromIdx !== null && toIdx !== null) {
-            applyReorder(fromIdx, toIdx, place);
+        if (isTouchDraggingRef.current) {
+            const fromIdx = touchStartIdxRef.current;
+            const toIdx = lastTargetIdxRef.current;
+            const place = lastPlaceRef.current;
+
+            if (fromIdx !== null && toIdx !== null) {
+                applyReorder(fromIdx, toIdx, place);
+            }
         }
+
+        // Reseta referências
+        setTimeout(() => {
+            isTouchDraggingRef.current = false;
+        }, 50);
 
         touchStartIdxRef.current = null;
         lastTargetIdxRef.current = null;
@@ -469,7 +512,9 @@ export default function DayColumn({
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
                                 onClick={() => handleStartEdit(block)}
-                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-transform duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] touch-none print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
+                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged
+                                    ? 'opacity-40 scale-95 border-dashed border-[#d97757] ring-2 ring-[#d97757]/30 shadow-lg'
+                                    : 'cursor-grab active:cursor-grabbing'
                                     }`}
                             >
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
