@@ -3,6 +3,7 @@ import Header from './components/Header';
 import BlockPickers from './components/BlockPickers';
 import DayColumn from './components/DayColumn';
 import CreateBlockModal from './components/CreateBlockModal';
+import PdfPreviewModal from './components/PdfPreviewModal';
 
 const DAYS_5 = [
   { key: 'seg', label: 'Segunda-feira', short: 'Seg' },
@@ -40,8 +41,11 @@ export default function App() {
     dayLabel: '',
   });
 
-  const handlePrint = () => {
-    window.print();
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
+
+  // Aciona a visualização prévia do PDF
+  const handleOpenPdfPreview = () => {
+    setIsPdfPreviewOpen(true);
   };
 
   const handleDropBlock = (dayKey, item) => {
@@ -130,7 +134,7 @@ export default function App() {
   const currentDayInfo = activeDays.find((d) => d.key === mobileActiveDay) || activeDays[0];
 
   return (
-    <div className="min-h-screen bg-[#141416] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 print:p-0 print:bg-white antialiased">
+    <div className="min-h-screen bg-[#141416] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 antialiased">
       <div className="w-full space-y-3 sm:space-y-5">
         <Header
           daysCount={daysCount}
@@ -140,7 +144,7 @@ export default function App() {
               setMobileActiveDay('seg');
             }
           }}
-          onPrint={handlePrint}
+          onPrint={handleOpenPdfPreview}
         />
 
         <BlockPickers
@@ -148,8 +152,8 @@ export default function App() {
           activeDayLabel={currentDayInfo.label}
         />
 
-        {/* Abas no Mobile com layout limpo e indicador integrado */}
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800/60 rounded-xl lg:hidden print:hidden overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full">
+        {/* Abas no Mobile */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800/60 rounded-xl lg:hidden overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full">
           {activeDays.map((d) => {
             const isCurrent = d.key === mobileActiveDay;
             const count = (schedule[d.key] || []).length;
@@ -165,7 +169,7 @@ export default function App() {
               >
                 <span>{d.short}</span>
                 {count > 0 && (
-                  <span className={`text-[10px] font-mono leading-none ${isCurrent ? 'text-white/80 font-bold' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] font-mono leading-none ${isCurrent ? 'text-white/90 font-bold' : 'text-zinc-500'}`}>
                     •{count}
                   </span>
                 )}
@@ -174,17 +178,10 @@ export default function App() {
           })}
         </div>
 
-        <div className="hidden print:block text-center py-2 mb-2 border-b border-zinc-300">
-          <h2 className="text-xs font-bold tracking-wider uppercase text-zinc-800">
-            Cronograma Semanal de Rotina
-          </h2>
-        </div>
-
+        {/* Grade principal */}
         <main
-          className={`w-full grid gap-2.5 sm:gap-3 
-            ${daysCount === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-7'} 
-            print:gap-1.5 ${daysCount === 5 ? 'print:grid-cols-5' : 'print:grid-cols-7'}
-          `}
+          className={`w-full grid gap-2.5 sm:gap-3 ${daysCount === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-7'
+            }`}
         >
           {activeDays.map((day) => {
             const isMobileHidden = day.key !== mobileActiveDay;
@@ -192,7 +189,7 @@ export default function App() {
             return (
               <div
                 key={day.key}
-                className={`w-full ${isMobileHidden ? 'hidden lg:block print:block' : 'block'}`}
+                className={`w-full ${isMobileHidden ? 'hidden lg:block' : 'block'}`}
               >
                 <DayColumn
                   dayKey={day.key}
@@ -212,6 +209,14 @@ export default function App() {
         </main>
       </div>
 
+      {/* Modal de Prévia e Download do PDF */}
+      <PdfPreviewModal
+        isOpen={isPdfPreviewOpen}
+        onClose={() => setIsPdfPreviewOpen(false)}
+        activeDays={activeDays}
+        schedule={schedule}
+      />
+
       <CreateBlockModal
         isOpen={modalState.isOpen}
         dayLabel={modalState.dayLabel}
@@ -219,7 +224,7 @@ export default function App() {
         onSave={handleSaveModalBlock}
       />
 
-      <footer className="pt-6 pb-2 text-center print:hidden">
+      <footer className="pt-6 pb-2 text-center">
         <a
           href="https://github.com/jaozinpaulin"
           target="_blank"
