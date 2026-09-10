@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Check, Copy, Pin } from 'lucide-react';
+import { Plus, Trash2, Check, Copy, Pin, GripVertical } from 'lucide-react';
 import { ICONS, COLORS } from './BlockPickers';
 import { maskTimeInput, normalizeTime } from '../utils/time';
 
@@ -34,11 +34,9 @@ export default function DayColumn({
     const [showCopyMenu, setShowCopyMenu] = useState(false);
     const [selectedTargets, setSelectedTargets] = useState([]);
     const [draggedCardIndex, setDraggedCardIndex] = useState(null);
-    const [dropPosition, setDropPosition] = useState(null); // { index: number, place: 'before' | 'after' }
+    const [dropPosition, setDropPosition] = useState(null);
 
     const copyMenuRef = useRef(null);
-
-    // Guarda referências ativas para o Touch no mobile não perder o alvo
     const touchStartIdxRef = useRef(null);
     const lastTargetIdxRef = useRef(null);
     const lastPlaceRef = useRef('after');
@@ -75,43 +73,33 @@ export default function DayColumn({
         setEditingId(null);
     };
 
-    // Reordena o array e avisa o App
     const applyReorder = (fromIndex, toIndex, place) => {
         if (fromIndex === null || toIndex === null || fromIndex === undefined || toIndex === undefined) return;
+        if (fromIndex === toIndex) return;
+
+        const updated = [...blocks];
+        const [movedItem] = updated.splice(fromIndex, 1);
 
         let targetIndex = place === 'before' ? toIndex : toIndex + 1;
         if (fromIndex < targetIndex) {
             targetIndex -= 1;
         }
 
-        if (fromIndex !== targetIndex) {
-            const updated = [...blocks];
-            const [moved] = updated.splice(fromIndex, 1);
-            updated.splice(targetIndex, 0, moved);
+        updated.splice(targetIndex, 0, movedItem);
 
-            if (onReorderBlocks) {
-                onReorderBlocks(dayKey, updated);
-            }
+        if (onReorderBlocks) {
+            onReorderBlocks(dayKey, updated);
         }
     };
 
     // Drag & Drop Desktop
     const handleDragOver = (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = 'move';
         if (!isOver) setIsOver(true);
     };
 
-    const handleDragEnter = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsOver(true);
-    };
-
     const handleDragLeave = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
         if (!e.currentTarget.contains(e.relatedTarget)) {
             setIsOver(false);
             setDropPosition(null);
@@ -243,17 +231,11 @@ export default function DayColumn({
         setSelectedTargets([]);
     };
 
-    const handleClear = () => {
-        if (blocks.length === 0) return;
-        if (onClearDay) onClearDay(dayKey);
-    };
-
     const totalBlocks = Array.isArray(blocks) ? blocks.length : 0;
 
     return (
         <div
             onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-colors duration-150 overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
@@ -277,11 +259,7 @@ export default function DayColumn({
                     }`}
             >
                 <div className="flex items-center gap-2 overflow-hidden">
-                    <span className={`text-sm font-semibold truncate print:text-[10px] print:font-bold print:text-zinc-900 ${isTargeted
-                        ? 'text-[#d97757]'
-                        : isWeekend
-                            ? 'text-[#d97757]/90'
-                            : 'text-zinc-200'
+                    <span className={`text-sm font-semibold truncate print:text-[10px] print:font-bold print:text-zinc-900 ${isTargeted ? 'text-[#d97757]' : isWeekend ? 'text-[#d97757]/90' : 'text-zinc-200'
                         }`}>
                         {dayLabel}
                     </span>
@@ -295,7 +273,7 @@ export default function DayColumn({
                     {totalBlocks > 0 && (
                         <button
                             type="button"
-                            onClick={handleClear}
+                            onClick={() => onClearDay && onClearDay(dayKey)}
                             title="Limpar dia"
                             className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer ml-0.5 print:hidden"
                         >
@@ -309,9 +287,7 @@ export default function DayColumn({
                         type="button"
                         onClick={() => onToggleTarget && onToggleTarget(dayKey)}
                         title={isTargeted ? 'Desafixar dia' : 'Fixar/destacar dia'}
-                        className={`p-2 rounded-lg transition-colors cursor-pointer ${isTargeted
-                            ? 'text-[#d97757] bg-[#d97757]/15'
-                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
+                        className={`p-2 rounded-lg transition-colors cursor-pointer ${isTargeted ? 'text-[#d97757] bg-[#d97757]/15' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                             }`}
                     >
                         <Pin className={`w-3.5 h-3.5 ${isTargeted ? 'fill-current' : ''}`} />
@@ -322,9 +298,7 @@ export default function DayColumn({
                             type="button"
                             onClick={() => setShowCopyMenu((prev) => !prev)}
                             title="Copiar rotina para outros dias"
-                            className={`p-2 rounded-lg transition-colors cursor-pointer ${showCopyMenu
-                                ? 'text-zinc-100 bg-zinc-800'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
+                            className={`p-2 rounded-lg transition-colors cursor-pointer ${showCopyMenu ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                                 }`}
                         >
                             <Copy className="w-4 h-4" />
@@ -412,28 +386,29 @@ export default function DayColumn({
                             return (
                                 <div
                                     key={block.id}
-                                    className="p-3.5 sm:p-3 rounded-xl border border-zinc-700 space-y-3 print:hidden bg-zinc-950/95 shadow-lg"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="p-3 sm:p-3 rounded-xl border border-zinc-700 space-y-2.5 print:hidden bg-zinc-950 shadow-lg"
                                 >
                                     <div className="flex items-center justify-between gap-2">
                                         <input
                                             type="text"
                                             value={editForm.title}
                                             onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-medium text-zinc-100 outline-none focus:border-[#d97757]"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs font-medium text-zinc-100 outline-none focus:border-[#d97757]"
                                             placeholder="Nome da atividade"
                                         />
                                         <button
                                             type="button"
-                                            onClick={() => onDeleteBlock(dayKey, block.id)}
+                                            onClick={() => onDeleteBlock && onDeleteBlock(dayKey, block.id)}
                                             title="Excluir"
-                                            className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
+                                            className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2">
-                                        <div className="flex flex-col">
+                                        <div>
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
@@ -443,13 +418,13 @@ export default function DayColumn({
                                                     const masked = maskTimeInput(e.target.value);
                                                     setEditForm((prev) => ({ ...prev, start: masked }));
                                                 }}
-                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
+                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-1.5 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="00:00"
                                             />
-                                            <span className="text-[10px] text-zinc-500 text-center mt-1">Início</span>
+                                            <span className="text-[10px] text-zinc-500 block text-center mt-0.5">Início</span>
                                         </div>
 
-                                        <div className="flex flex-col">
+                                        <div>
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
@@ -459,19 +434,19 @@ export default function DayColumn({
                                                     const masked = maskTimeInput(e.target.value);
                                                     setEditForm((prev) => ({ ...prev, end: masked }));
                                                 }}
-                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
+                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-1.5 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="00:00"
                                             />
-                                            <span className="text-[10px] text-zinc-500 text-center mt-1">Fim</span>
+                                            <span className="text-[10px] text-zinc-500 block text-center mt-0.5">Fim</span>
                                         </div>
                                     </div>
 
                                     <button
                                         type="button"
                                         onClick={() => handleSaveEdit(block.id)}
-                                        className="w-full py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
+                                        className="w-full py-1.5 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
                                     >
-                                        <Check className="w-4 h-4" />
+                                        <Check className="w-3.5 h-3.5" />
                                         Concluir
                                     </button>
                                 </div>
@@ -494,7 +469,7 @@ export default function DayColumn({
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
                                 onClick={() => handleStartEdit(block)}
-                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
+                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-transform duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] touch-none print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
                                     }`}
                             >
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
