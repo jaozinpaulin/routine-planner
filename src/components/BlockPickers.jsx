@@ -11,67 +11,67 @@ export const ICONS = {
 export const COLORS = {
     emerald: {
         dot: 'bg-emerald-400',
-        bg: 'bg-emerald-500/10',
-        border: 'border-emerald-500/30 hover:border-emerald-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-emerald-400',
-        text: 'text-emerald-100',
-        btn: 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border-emerald-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     amber: {
         dot: 'bg-amber-400',
-        bg: 'bg-amber-500/10',
-        border: 'border-amber-500/30 hover:border-amber-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-amber-400',
-        text: 'text-amber-100',
-        btn: 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-amber-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     orange: {
-        dot: 'bg-orange-400',
-        bg: 'bg-orange-500/10',
-        border: 'border-orange-500/30 hover:border-orange-500/50',
-        icon: 'text-orange-400',
-        text: 'text-orange-100',
-        btn: 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-200 border-orange-500/40',
+        dot: 'bg-[#d97757]',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
+        icon: 'text-[#d97757]',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     teal: {
         dot: 'bg-teal-400',
-        bg: 'bg-teal-500/10',
-        border: 'border-teal-500/30 hover:border-teal-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-teal-400',
-        text: 'text-teal-100',
-        btn: 'bg-teal-500/20 hover:bg-teal-500/30 text-teal-200 border-teal-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     cyan: {
         dot: 'bg-cyan-400',
-        bg: 'bg-cyan-500/10',
-        border: 'border-cyan-500/30 hover:border-cyan-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-cyan-400',
-        text: 'text-cyan-100',
-        btn: 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border-cyan-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     indigo: {
         dot: 'bg-indigo-400',
-        bg: 'bg-indigo-500/10',
-        border: 'border-indigo-500/30 hover:border-indigo-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-indigo-400',
-        text: 'text-indigo-100',
-        btn: 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border-indigo-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     violet: {
         dot: 'bg-violet-400',
-        bg: 'bg-violet-500/10',
-        border: 'border-violet-500/30 hover:border-violet-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-violet-400',
-        text: 'text-violet-100',
-        btn: 'bg-violet-500/20 hover:bg-violet-500/30 text-violet-200 border-violet-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     rose: {
         dot: 'bg-rose-400',
-        bg: 'bg-rose-500/10',
-        border: 'border-rose-500/30 hover:border-rose-500/50',
+        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
+        border: 'border-zinc-800/80 hover:border-zinc-700',
         icon: 'text-rose-400',
-        text: 'text-rose-100',
-        btn: 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border-rose-500/40',
+        text: 'text-zinc-200',
+        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
 };
 
@@ -142,15 +142,12 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
     const ActiveIcon = editingItem ? (ICONS[editingItem.icon] || ICONS.Sparkles) : null;
 
     return (
-        <section className="bg-zinc-900/40 border border-zinc-800/70 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden relative">
-            <div className="flex items-center justify-between mb-2.5 px-1">
+        <section className="bg-zinc-900/40 border border-zinc-800/60 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden relative">
+            <div className="flex items-center justify-between mb-3 px-1">
                 <span className="text-xs font-semibold text-zinc-300">
                     Blocos rápidos
                 </span>
-                <span className="text-[11px] text-zinc-500 hidden sm:inline">
-                    Arraste ou clique para ajustar e adicionar {activeDayLabel ? `em ${activeDayLabel}` : ''}
-                </span>
-                <span className="text-[11px] text-orange-400/90 sm:hidden">
+                <span className="text-[11px] text-zinc-400">
                     Toque para adicionar {activeDayLabel ? `em ${activeDayLabel}` : ''}
                 </span>
             </div>
@@ -166,42 +163,42 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                             draggable
                             onDragStart={(e) => startDrag(e, item)}
                             onClick={() => handleCardClick(item)}
-                            className={`group relative p-2.5 flex items-center justify-between overflow-hidden rounded-xl border transition-all cursor-pointer active:scale-95 sm:hover:scale-[1.02] select-none ${theme.bg} ${theme.border}`}
+                            className={`group relative p-2.5 sm:p-3 flex items-center justify-between overflow-hidden rounded-xl border transition-all cursor-pointer active:scale-98 select-none ${theme.bg} ${theme.border}`}
                         >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
                                 <IconComp
-                                    strokeWidth={1.7}
+                                    strokeWidth={2}
                                     className={`w-4 h-4 shrink-0 ${theme.icon}`}
                                 />
-                                <span className={`text-[11px] font-semibold leading-tight truncate ${theme.text}`}>
+                                <span className="text-xs font-medium leading-tight truncate text-zinc-200 group-hover:text-white">
                                     {item.title}
                                 </span>
                             </div>
 
-                            <Plus className="w-3.5 h-3.5 text-zinc-500 opacity-60 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
+                            <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-colors shrink-0 ml-1" />
                         </div>
                     );
                 })}
             </div>
 
-            {/* Card de Configuração Rápida */}
+            {/* Modal Inline ao clicar */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-xs">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs">
                     <div
                         ref={modalRef}
-                        className="w-full sm:max-w-sm bg-[#161618] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 animate-in fade-in zoom-in-95 duration-150"
+                        className="w-full sm:max-w-sm bg-[#161618] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
                     >
-                        <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800/80">
-                            <div className="flex items-center gap-2">
-                                <div className={`p-2 rounded-xl border ${activeTheme.bg} ${activeTheme.border}`}>
-                                    {ActiveIcon && <ActiveIcon className={`w-4 h-4 ${activeTheme.icon}`} />}
+                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                            <div className="flex items-center gap-2.5">
+                                <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
+                                    {ActiveIcon && <ActiveIcon strokeWidth={2} className={`w-4 h-4 ${activeTheme.icon}`} />}
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider block">
-                                        Adicionar Bloco {activeDayLabel ? `• ${activeDayLabel}` : ''}
+                                    <span className="text-[10px] font-semibold text-[#d97757] uppercase tracking-wider block">
+                                        Novo Bloco {activeDayLabel ? `• ${activeDayLabel}` : ''}
                                     </span>
-                                    <h4 className="text-sm font-bold text-zinc-100">
-                                        Configurar Atividade
+                                    <h4 className="text-sm font-semibold text-zinc-100">
+                                        Definir Atividade
                                     </h4>
                                 </div>
                             </div>
@@ -210,13 +207,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                 onClick={() => setEditingItem(null)}
                                 className="p-1.5 text-zinc-400 hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
                             >
-                                <X className="w-4 h-4" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleConfirm} className="space-y-3">
+                        <form onSubmit={handleConfirm} className="space-y-3.5">
                             <div>
-                                <label className="block text-[11px] font-semibold text-zinc-400 mb-1">
+                                <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                                     Nome da Atividade
                                 </label>
                                 <input
@@ -224,14 +221,14 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                     required
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-100 outline-none transition-colors"
+                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 outline-none transition-colors"
                                     placeholder="Ex: Treino, Estudo..."
                                 />
                             </div>
 
                             <div className="grid grid-cols-2 gap-2.5">
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-zinc-400 mb-1 text-center">
+                                    <label className="block text-[11px] font-medium text-zinc-400 mb-1 text-center">
                                         Início
                                     </label>
                                     <input
@@ -241,12 +238,12 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         value={start}
                                         onChange={(e) => setStart(maskTimeInput(e.target.value))}
                                         onBlur={(e) => setStart(normalizeTime(e.target.value, '08:00'))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 rounded-xl py-2 text-sm font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="08:00"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-zinc-400 mb-1 text-center">
+                                    <label className="block text-[11px] font-medium text-zinc-400 mb-1 text-center">
                                         Fim
                                     </label>
                                     <input
@@ -256,13 +253,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         value={end}
                                         onChange={(e) => setEnd(maskTimeInput(e.target.value))}
                                         onBlur={(e) => setEnd(normalizeTime(e.target.value, '09:00'))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-orange-500/70 rounded-xl py-2 text-sm font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="09:00"
                                     />
                                 </div>
                             </div>
 
-                            <div className="flex gap-2 pt-1.5">
+                            <div className="flex gap-2 pt-2">
                                 <button
                                     type="button"
                                     onClick={() => setEditingItem(null)}
@@ -272,9 +269,9 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-500 active:scale-95 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
+                                    className="flex-1 py-2.5 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                                 >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="w-4 h-4" />
                                     Adicionar
                                 </button>
                             </div>

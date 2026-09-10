@@ -44,7 +44,6 @@ export default function App() {
     window.print();
   };
 
-  // Drop desktop tradicional (arrastar direto para a coluna)
   const handleDropBlock = (dayKey, item) => {
     const newBlock = {
       id: `${item.id}-${Date.now()}`,
@@ -61,7 +60,6 @@ export default function App() {
     }));
   };
 
-  // Recebe o item configurado diretamente do card inline do BlockPickers
   const handleQuickAdd = (configuredItem) => {
     const targetDay = mobileActiveDay;
     handleDropBlock(targetDay, configuredItem);
@@ -150,8 +148,8 @@ export default function App() {
           activeDayLabel={currentDayInfo.label}
         />
 
-        {/* Abas no Mobile */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl lg:hidden print:hidden overflow-x-auto">
+        {/* Abas no Mobile com layout limpo e indicador integrado */}
+        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800/60 rounded-xl lg:hidden print:hidden overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full">
           {activeDays.map((d) => {
             const isCurrent = d.key === mobileActiveDay;
             const count = (schedule[d.key] || []).length;
@@ -160,15 +158,15 @@ export default function App() {
                 key={d.key}
                 type="button"
                 onClick={() => setMobileActiveDay(d.key)}
-                className={`flex-1 min-w-[52px] py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${isCurrent
-                  ? 'bg-[#d97757] text-white shadow-md'
+                className={`flex-1 min-w-[48px] py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${isCurrent
+                  ? 'bg-[#d97757] text-white shadow-xs'
                   : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
                   }`}
               >
                 <span>{d.short}</span>
                 {count > 0 && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${isCurrent ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
-                    {count}
+                  <span className={`text-[10px] font-mono leading-none ${isCurrent ? 'text-white/80 font-bold' : 'text-zinc-500'}`}>
+                    •{count}
                   </span>
                 )}
               </button>
@@ -183,7 +181,7 @@ export default function App() {
         </div>
 
         <main
-          className={`w-full grid gap-2 sm:gap-3 
+          className={`w-full grid gap-2.5 sm:gap-3 
             ${daysCount === 5 ? 'lg:grid-cols-5' : 'lg:grid-cols-7'} 
             print:gap-1.5 ${daysCount === 5 ? 'print:grid-cols-5' : 'print:grid-cols-7'}
           `}

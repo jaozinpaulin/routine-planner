@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Plus, Trash2, Check, Pencil, Copy } from 'lucide-react';
+import { Plus, Trash2, Check, Copy } from 'lucide-react';
 import { ICONS, COLORS } from './BlockPickers';
 import { maskTimeInput, normalizeTime } from '../utils/time';
 
@@ -27,12 +27,10 @@ export default function DayColumn({
 }) {
     const [isOver, setIsOver] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [isHighlighted, setIsHighlighted] = useState(false);
     const [showCopyMenu, setShowCopyMenu] = useState(false);
     const [selectedTargets, setSelectedTargets] = useState([]);
     const copyMenuRef = useRef(null);
 
-    // Fecha o popover ao clicar fora
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (copyMenuRef.current && !copyMenuRef.current.contains(e.target)) {
@@ -90,88 +88,70 @@ export default function DayColumn({
         }
     };
 
+    const totalBlocks = Array.isArray(blocks) ? blocks.length : 0;
+
     return (
         <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative flex flex-col rounded-2xl border min-h-[460px] transition-all overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
-                ? 'bg-[#d97757]/5 border-[#d97757]/30'
-                : isHighlighted
-                    ? 'border-[#d97757]/80 bg-zinc-900/30'
-                    : isWeekend
-                        ? 'bg-[#121214]/40 border-[#27272a]/30 opacity-70 hover:opacity-100 hover:border-[#27272a]/60'
-                        : 'bg-zinc-900/30 border-zinc-800/70 hover:border-zinc-700/60'
+            className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-all overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
+                ? 'bg-zinc-900/70 border-[#d97757]/60'
+                : isWeekend
+                    ? 'bg-[#151518] border-zinc-800/70'
+                    : 'bg-zinc-900/40 border-zinc-800/70'
                 }`}
         >
-            {/* Cabeçalho da coluna */}
+            {/* Header com contador limpo e preciso */}
             <div
-                className={`px-3.5 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isWeekend
-                    ? 'border-zinc-800 bg-zinc-900/70'
-                    : 'border-zinc-800/80 bg-zinc-950/30'
+                className={`px-4 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isWeekend
+                    ? 'border-zinc-800/70 bg-zinc-900/50'
+                    : 'border-zinc-800/70 bg-zinc-950/40'
                     }`}
             >
-                <div className="flex items-center gap-1.5 overflow-hidden">
-                    <span
-                        className={`text-xs font-semibold truncate print:text-[10px] print:font-bold print:text-zinc-900 ${isHighlighted
-                            ? 'text-[#d97757]'
-                            : isWeekend
-                                ? 'text-orange-300'
-                                : 'text-zinc-200'
-                            }`}
-                    >
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="text-sm font-semibold truncate text-zinc-200 print:text-[10px] print:font-bold print:text-zinc-900">
                         {dayLabel}
                     </span>
-                    {blocks.length > 0 && (
-                        <span className="text-[10px] font-mono text-zinc-500 print:text-[8px] print:text-zinc-500 shrink-0">
-                            {blocks.length}
+
+                    {totalBlocks > 0 && (
+                        <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-md bg-zinc-800/80 text-zinc-400 border border-zinc-700/50 print:border-none print:bg-transparent print:text-[8px]">
+                            {totalBlocks}
                         </span>
                     )}
 
-                    {blocks.length > 0 && (
+                    {totalBlocks > 0 && (
                         <button
                             type="button"
                             onClick={handleClear}
                             title="Limpar dia"
-                            className="p-1 text-red-500/50 hover:text-red-500/80 transition-colors cursor-pointer ml-0.5 print:hidden"
+                            className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer ml-0.5 print:hidden"
                         >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                         </button>
                     )}
                 </div>
 
-                <div className="flex items-center gap-0.5 print:hidden relative">
-                    <button
-                        type="button"
-                        onClick={() => setIsHighlighted((prev) => !prev)}
-                        title={isHighlighted ? 'Remover destaque' : 'Destacar coluna'}
-                        className={`p-1 rounded-md transition-colors cursor-pointer ${isHighlighted
-                            ? 'text-[#d97757] bg-[#d97757]/15'
-                            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
-                            }`}
-                    >
-                        <Pencil className="w-3.5 h-3.5" />
-                    </button>
-
+                <div className="flex items-center gap-1 print:hidden relative">
                     <div className="relative" ref={copyMenuRef}>
                         <button
                             type="button"
                             onClick={() => setShowCopyMenu((prev) => !prev)}
                             title="Copiar rotina para outros dias"
-                            className={`p-1 rounded-md transition-colors cursor-pointer ${showCopyMenu
+                            className={`p-2 rounded-lg transition-colors cursor-pointer ${showCopyMenu
                                 ? 'text-zinc-100 bg-zinc-800'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800'
+                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                                 }`}
                         >
-                            <Copy className="w-3.5 h-3.5" />
+                            <Copy className="w-4 h-4" />
                         </button>
 
                         {showCopyMenu && (
-                            <div className="absolute right-0 top-7 z-50 w-44 p-2 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl space-y-2">
+                            <div className="absolute right-0 top-10 z-50 w-48 p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl space-y-2">
                                 <span className="block text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
                                     Copiar para
                                 </span>
-                                <div className="grid grid-cols-4 gap-1">
+                                <div className="grid grid-cols-4 gap-1.5">
                                     {ALL_DAYS.map((d) => {
                                         const isCurrent = d.key === dayKey;
                                         const isSelected = selectedTargets.includes(d.key);
@@ -181,7 +161,7 @@ export default function DayColumn({
                                                 type="button"
                                                 disabled={isCurrent}
                                                 onClick={() => toggleTarget(d.key)}
-                                                className={`py-1 text-[11px] font-mono rounded transition-colors cursor-pointer ${isCurrent
+                                                className={`py-1.5 text-xs font-mono rounded-lg transition-colors cursor-pointer ${isCurrent
                                                     ? 'opacity-30 cursor-not-allowed bg-zinc-950 text-zinc-600'
                                                     : isSelected
                                                         ? 'bg-[#d97757] text-white font-bold'
@@ -197,9 +177,9 @@ export default function DayColumn({
                                     type="button"
                                     onClick={handleConfirmCopy}
                                     disabled={selectedTargets.length === 0}
-                                    className="w-full py-1 text-[11px] font-medium bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 rounded transition-colors cursor-pointer flex items-center justify-center gap-1"
+                                    className="w-full py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                                 >
-                                    <Check className="w-3 h-3" />
+                                    <Check className="w-3.5 h-3.5" />
                                     Aplicar
                                 </button>
                             </div>
@@ -210,7 +190,7 @@ export default function DayColumn({
                         type="button"
                         onClick={() => onAddClick && onAddClick(dayKey)}
                         title="Adicionar atividade"
-                        className="p-1 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 rounded-md transition-colors cursor-pointer"
+                        className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 rounded-lg transition-colors cursor-pointer"
                     >
                         <Plus className="w-4 h-4" />
                     </button>
@@ -218,15 +198,15 @@ export default function DayColumn({
             </div>
 
             {/* Lista de cards */}
-            <div className="flex-1 p-2.5 flex flex-col gap-2 print:p-1 print:gap-1">
-                {blocks.length === 0 ? (
+            <div className="flex-1 p-3 sm:p-2.5 flex flex-col gap-2 print:p-1 print:gap-1">
+                {totalBlocks === 0 ? (
                     <button
                         type="button"
                         onClick={() => onAddClick && onAddClick(dayKey)}
-                        className="flex-1 min-h-[140px] flex flex-col items-center justify-center border border-dashed border-zinc-800/60 hover:border-zinc-700 rounded-xl transition-colors cursor-pointer print:hidden group"
+                        className="flex-1 min-h-[140px] flex flex-col items-center justify-center border border-dashed border-zinc-800 hover:border-zinc-700 rounded-xl transition-colors cursor-pointer print:hidden group"
                     >
-                        <span className="text-xs text-zinc-600 group-hover:text-zinc-400">
-                            + Adicionar
+                        <span className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300">
+                            + Adicionar atividade
                         </span>
                     </button>
                 ) : (
@@ -235,28 +215,27 @@ export default function DayColumn({
                         const theme = (COLORS && COLORS[block.color]) ? COLORS[block.color] : (COLORS?.orange || {});
                         const isEditing = editingId === block.id;
 
-                        // Card em edição inline (oculto na impressão)
                         if (isEditing) {
                             return (
                                 <div
                                     key={block.id}
-                                    className="p-3 rounded-xl border border-zinc-700/80 space-y-2.5 print:hidden bg-zinc-950/90 shadow-md"
+                                    className="p-3.5 sm:p-3 rounded-xl border border-zinc-700 space-y-3 print:hidden bg-zinc-950/95 shadow-lg"
                                 >
-                                    <div className="flex items-center justify-between gap-1.5">
+                                    <div className="flex items-center justify-between gap-2">
                                         <input
                                             type="text"
                                             value={block.title}
                                             onChange={(e) =>
                                                 onUpdateBlock(dayKey, block.id, { title: e.target.value })
                                             }
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-zinc-100 outline-none focus:border-zinc-600"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-medium text-zinc-100 outline-none focus:border-[#d97757]"
                                             placeholder="Nome da atividade"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => onDeleteBlock(dayKey, block.id)}
                                             title="Excluir"
-                                            className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer shrink-0"
+                                            className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -277,10 +256,10 @@ export default function DayColumn({
                                                     const finalTime = normalizeTime(e.target.value, '08:00');
                                                     onUpdateBlock(dayKey, block.id, { start: finalTime });
                                                 }}
-                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 text-xs font-mono text-center text-zinc-100 outline-none focus:border-zinc-600"
+                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="08:00"
                                             />
-                                            <span className="text-[9px] text-zinc-500 text-center mt-0.5">Inicio</span>
+                                            <span className="text-[10px] text-zinc-500 text-center mt-1">Início</span>
                                         </div>
 
                                         <div className="flex flex-col">
@@ -297,45 +276,46 @@ export default function DayColumn({
                                                     const finalTime = normalizeTime(e.target.value, '09:00');
                                                     onUpdateBlock(dayKey, block.id, { end: finalTime });
                                                 }}
-                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 text-xs font-mono text-center text-zinc-100 outline-none focus:border-zinc-600"
+                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="09:00"
                                             />
-                                            <span className="text-[9px] text-zinc-500 text-center mt-0.5">Fim</span>
+                                            <span className="text-[10px] text-zinc-500 text-center mt-1">Fim</span>
                                         </div>
                                     </div>
 
                                     <button
                                         type="button"
                                         onClick={() => setEditingId(null)}
-                                        className={`w-full py-1.5 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 border transition-colors cursor-pointer ${theme.btn || 'bg-zinc-800 text-zinc-200'}`}
+                                        className="w-full py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
                                     >
-                                        <Check className="w-3.5 h-3.5" />
+                                        <Check className="w-4 h-4" />
                                         Concluir
                                     </button>
                                 </div>
                             );
                         }
 
-                        // Card normal exibido na tela e compactado para PDF
                         return (
                             <div
                                 key={block.id}
                                 onClick={() => setEditingId(block.id)}
-                                className={`group relative min-h-[64px] p-2.5 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 hover:border-zinc-700/90 transition-all cursor-pointer select-none hover:scale-[1.01] 
-                                print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${theme.bg || 'bg-zinc-900/30'}`}
+                                className="group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid"
                             >
-                                <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
+                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
                                     <IconComp
-                                        strokeWidth={1.5}
-                                        className={`w-9 h-9 opacity-45 group-hover:opacity-65 transition-opacity print:w-3.5 print:h-3.5 print:opacity-40 ${theme.icon || 'text-zinc-400'}`}
+                                        strokeWidth={1.75}
+                                        className={`w-7 h-7 opacity-35 group-hover:opacity-60 transition-opacity print:w-3.5 print:h-3.5 print:opacity-40 ${theme.icon || 'text-zinc-400'}`}
                                     />
                                 </div>
 
-                                <span className="relative z-10 text-[10px] font-mono text-zinc-400 print:text-[7.5px] print:leading-none print:font-semibold print:text-zinc-500">
-                                    {block.start} - {block.end}
-                                </span>
+                                <div className="flex items-center gap-1.5 relative z-10">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${theme.dot || 'bg-zinc-400'} print:hidden`} />
+                                    <span className="text-[11px] sm:text-[10px] font-mono text-zinc-400 print:text-[7.5px] print:leading-none print:font-semibold print:text-zinc-500">
+                                        {block.start} - {block.end}
+                                    </span>
+                                </div>
 
-                                <span className="relative z-10 text-xs font-semibold leading-tight pr-8 line-clamp-2 text-zinc-200/90 print:text-[8.5px] print:leading-tight print:pr-4 print:text-zinc-900 print:line-clamp-1">
+                                <span className="relative z-10 text-xs font-medium leading-snug pr-7 line-clamp-2 text-zinc-100 print:text-[8.5px] print:leading-tight print:pr-4 print:text-zinc-900 print:line-clamp-1">
                                     {block.title}
                                 </span>
                             </div>
@@ -345,5 +325,4 @@ export default function DayColumn({
             </div>
         </div>
     );
-
 }
