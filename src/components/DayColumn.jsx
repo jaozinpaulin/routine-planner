@@ -38,6 +38,14 @@ export default function DayColumn({
 
     const copyMenuRef = useRef(null);
 
+    // Controle de arrasto seguro (Mouse e Touch unificados)
+    const isDraggingRef = useRef(false);
+    const dragSourceIndexRef = useRef(null);
+    const holdTimeoutRef = useRef(null);
+    const startPosRef = useRef({ x: 0, y: 0 });
+    const currentDropTargetRef = useRef(null);
+
+    // Fecha o menu de copiar ao clicar fora
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (copyMenuRef.current && !copyMenuRef.current.contains(e.target)) {
@@ -51,6 +59,7 @@ export default function DayColumn({
     }, [showCopyMenu]);
 
     const handleStartEdit = (block) => {
+        if (isDraggingRef.current) return;
         setEditingId(block.id);
         setEditForm({
             title: block.title,
@@ -70,9 +79,10 @@ export default function DayColumn({
         setEditingId(null);
     };
 
+    // Reordena a lista e atualiza o estado principal
     const applyReorder = (fromIndex, toIndex, place) => {
         if (fromIndex === null || toIndex === null || fromIndex === undefined || toIndex === undefined) return;
-        if (fromIndex === toIndex) return;
+        if (fromIndex === toIndex && place === 'after') return;
 
         const updated = [...blocks];
         const [movedItem] = updated.splice(fromIndex, 1);
@@ -89,88 +99,88 @@ export default function DayColumn({
         }
     };
 
-    // Drag & Drop Desktop
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        if (!isOver) setIsOver(true);
-    };
-
-    const handleDragLeave = (e) => {
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-            setIsOver(false);
-            setDropPosition(null);
-        }
-    };
-
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsOver(false);
-        setDropPosition(null);
-
-        const internalIndex = e.dataTransfer.getData('text/card-index');
-        const sourceDay = e.dataTransfer.getData('text/day-key');
-
-        if (internalIndex !== '' && sourceDay === dayKey) {
-            setDraggedCardIndex(null);
+    // Sistema de Arrastar e Soltar (Mouse / Touch)
+    const handlePointerDown = (e, index) => {
+        // Ignora se o clique foi em inputs ou botões
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
             return;
         }
 
-        const rawData = e.dataTransfer.getData('application/json');
-        if (!rawData) return;
+        const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
 
-        try {
-            const parsed = JSON.parse(rawData);
-            const blockItem = parsed.item || parsed;
-            if (onDropBlock) {
-                onDropBlock(dayKey, blockItem);
+        startPosRef.current = { x: clientX, y: clientY };
+        dragSourceIndexRef.current = index;
+        isDraggingRef.current = false;
+        currentDropTargetRef.current = null;
+
+        const isTouch = Boolean(e.touches);
+        const holdTime = isTouch ? 250 : 50; // Delay curto para segurar e arrastar
+
+        holdTimeoutRef.current = setTimeout(() => {
+            isDraggingRef.current = true;
+            setDraggedCardIndex(index);
+        }, holdTime);
+
+        const handlePointerMove = (moveEvent) => {
+            const currentX = moveEvent.clientX || (moveEvent.touches ? moveEvent.touches[0].clientX : 0);
+            const currentY = moveEvent.clientY || (moveEvent.touches ? moveEvent.touches[0].clientY : 0);
+
+            const dx = Math.abs(currentX - startPosRef.current.x);
+            const dy = Math.abs(currentY - startPosRef.current.y);
+
+            // Permite rolar a página se o usuário mexer o dedo antes do tempo de segurar
+            if (!isDraggingRef.current && (dx > 8 || dy > 8)) {
+                clearTimeout(holdTimeoutRef.current);
+                return;
             }
-        } catch (err) {
-            console.error('Erro drop coluna:', err);
-        }
-    };
 
-    const handleCardDragStart = (e, index) => {
-        e.stopPropagation();
-        setDraggedCardIndex(index);
-        e.dataTransfer.setData('text/card-index', String(index));
-        e.dataTransfer.setData('text/day-key', dayKey);
-        e.dataTransfer.effectAllowed = 'move';
-    };
+            if (isDraggingRef.current) {
+                if (moveEvent.cancelable) moveEvent.preventDefault();
 
-    const handleCardDragOver = (e, index) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.dataTransfer.dropEffect = 'move';
+                const targetElement = document.elementFromPoint(currentX, currentY);
+                const cardElement = targetElement ? targetElement.closest('[data-card-index]') : null;
 
-        const rect = e.currentTarget.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-        const place = e.clientY < midY ? 'before' : 'after';
+                if (cardElement) {
+                    const targetIdx = Number(cardElement.getAttribute('data-card-index'));
+                    const rect = cardElement.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    const place = currentY < midY ? 'before' : 'after';
 
-        if (!dropPosition || dropPosition.index !== index || dropPosition.place !== place) {
-            setDropPosition({ index, place });
-        }
-    };
+                    const targetData = { index: targetIdx, place };
+                    currentDropTargetRef.current = targetData;
+                    setDropPosition(targetData);
+                }
+            }
+        };
 
-    const handleCardDrop = (e, targetIndex) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsOver(false);
+        const handlePointerUp = () => {
+            clearTimeout(holdTimeoutRef.current);
 
-        const sourceIndexStr = e.dataTransfer.getData('text/card-index');
-        const sourceDay = e.dataTransfer.getData('text/day-key');
+            // Aplica a reordenação ao soltar
+            if (isDraggingRef.current && currentDropTargetRef.current !== null) {
+                applyReorder(
+                    dragSourceIndexRef.current,
+                    currentDropTargetRef.current.index,
+                    currentDropTargetRef.current.place
+                );
+            }
 
-        if (sourceIndexStr !== '' && sourceDay === dayKey) {
-            const fromIndex = Number(sourceIndexStr);
-            applyReorder(fromIndex, targetIndex, dropPosition?.place || 'after');
+            isDraggingRef.current = false;
             setDraggedCardIndex(null);
             setDropPosition(null);
-            return;
-        }
+            currentDropTargetRef.current = null;
 
-        setDropPosition(null);
-        handleDrop(e);
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', handlePointerUp);
+            window.removeEventListener('touchmove', handlePointerMove);
+            window.removeEventListener('touchend', handlePointerUp);
+        };
+
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+        window.addEventListener('touchmove', handlePointerMove, { passive: false });
+        window.addEventListener('touchend', handlePointerUp);
     };
 
     const toggleCopyTarget = (targetKey) => {
@@ -190,30 +200,18 @@ export default function DayColumn({
     const totalBlocks = Array.isArray(blocks) ? blocks.length : 0;
 
     return (
-        <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-colors duration-150 overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
-                ? 'border-zinc-700/80 bg-zinc-800/25'
-                : isTargeted
-                    ? 'border-[#d97757]/50 bg-zinc-900/40 ring-1 ring-[#d97757]/20 shadow-sm'
-                    : isWeekend
-                        ? 'bg-[#151518] border-zinc-800/70'
-                        : 'bg-zinc-900/40 border-zinc-800/70'
-                }`}
-        >
-            {/* Header da coluna */}
-            <div
-                className={`px-4 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isOver
-                    ? 'border-zinc-700/70 bg-zinc-850/40'
-                    : isTargeted
-                        ? 'border-[#d97757]/30 bg-zinc-900/60'
-                        : isWeekend
-                            ? 'border-zinc-800/70 bg-zinc-900/50'
-                            : 'border-zinc-800/70 bg-zinc-950/40'
-                    }`}
-            >
+        <div className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-colors duration-150 overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isTargeted
+            ? 'border-[#d97757]/50 bg-zinc-900/40 ring-1 ring-[#d97757]/20 shadow-sm'
+            : isWeekend
+                ? 'bg-[#151518] border-zinc-800/70'
+                : 'bg-zinc-900/40 border-zinc-800/70'
+            }`}>
+            <div className={`px-4 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isTargeted
+                ? 'border-[#d97757]/30 bg-zinc-900/60'
+                : isWeekend
+                    ? 'border-zinc-800/70 bg-zinc-900/50'
+                    : 'border-zinc-800/70 bg-zinc-950/40'
+                }`}>
                 <div className="flex items-center gap-2 overflow-hidden">
                     <span className={`text-sm font-semibold truncate print:text-[10px] print:font-bold print:text-zinc-900 ${isTargeted ? 'text-[#d97757]' : isWeekend ? 'text-[#d97757]/90' : 'text-zinc-200'
                         }`}>
@@ -338,6 +336,7 @@ export default function DayColumn({
                                 : '-translate-y-2 border-zinc-700 shadow-md'
                             : 'translate-y-0';
 
+                        // Renderiza o formulário de edição do bloco
                         if (isEditing) {
                             return (
                                 <div
@@ -366,8 +365,7 @@ export default function DayColumn({
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <input
-                                                type="text"
-                                                inputMode="numeric"
+                                                type="tel"
                                                 maxLength={5}
                                                 value={editForm.start}
                                                 onChange={(e) => {
@@ -382,8 +380,7 @@ export default function DayColumn({
 
                                         <div>
                                             <input
-                                                type="text"
-                                                inputMode="numeric"
+                                                type="tel"
                                                 maxLength={5}
                                                 value={editForm.end}
                                                 onChange={(e) => {
@@ -409,20 +406,15 @@ export default function DayColumn({
                             );
                         }
 
+                        // Renderiza o Card normal
                         return (
                             <div
                                 key={block.id}
                                 data-card-index={index}
-                                draggable
-                                onDragStart={(e) => handleCardDragStart(e, index)}
-                                onDragOver={(e) => handleCardDragOver(e, index)}
-                                onDrop={(e) => handleCardDrop(e, index)}
-                                onDragEnd={() => {
-                                    setDraggedCardIndex(null);
-                                    setDropPosition(null);
-                                }}
+                                onMouseDown={(e) => handlePointerDown(e, index)}
+                                onTouchStart={(e) => handlePointerDown(e, index)}
                                 onClick={() => handleStartEdit(block)}
-                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-pointer select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
+                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-30 scale-95 border-dashed border-[#d97757] shadow-xl bg-zinc-800' : ''
                                     }`}
                             >
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">

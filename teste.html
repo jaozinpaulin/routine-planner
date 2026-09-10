@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hold and Drag Mobile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background-color: #f4f4f9;
+            position: relative;
+        }
+
+        #caixa {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            touch-action: none;
+            /* Impede o scroll da tela */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+            /* Efeito visual ao segurar */
+        }
+
+        /* Classe visual para quando o elemento estiver pronto para ser movido */
+        #caixa.ativado {
+            background-color: #2ecc71;
+            transform: scale(1.1);
+            /* Dá um leve zoom para dar feedback ao usuário */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="caixa">Segure</div>
+
+    <script>
+        const caixa = document.getElementById('caixa');
+        let temporizadorHold;
+        let podeMover = false; // Flag que controla se o movimento está liberado
+        const tempoEspera = 600; // Tempo necessário segurando (em milissegundos)
+
+        caixa.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+
+            // Guarda a distância do toque em relação às bordas do elemento
+            caixa.dataset.offsetX = touch.clientX - caixa.offsetLeft;
+            caixa.dataset.offsetY = touch.clientY - caixa.offsetTop;
+
+            // Inicia o cronômetro. Se der o tempo, libera o movimento
+            temporizadorHold = setTimeout(() => {
+                podeMover = true;
+                caixa.classList.add('ativado'); // Feedback visual de que "ativou"
+            }, tempoEspera);
+        });
+
+        caixa.addEventListener('touchmove', (e) => {
+            // Se o usuário mover o dedo ANTES de dar o tempo, cancelamos o "segurar"
+            if (!podeMover) {
+                clearTimeout(temporizadorHold);
+                return;
+            }
+
+            // Se o movimento foi liberado, impede o scroll da página e move o objeto
+            e.preventDefault();
+            const touch = e.touches[0];
+
+            let newX = touch.clientX - parseFloat(caixa.dataset.offsetX);
+            let newY = touch.clientY - parseFloat(caixa.dataset.offsetY);
+
+            caixa.style.left = `${newX}px`;
+            caixa.style.top = `${newY}px`;
+        });
+
+        caixa.addEventListener('touchend', () => {
+            // Limpa o temporizador se o usuário soltar o dedo antes do tempo
+            clearTimeout(temporizadorHold);
+
+            // Reseta os estados
+            podeMover = false;
+            caixa.classList.remove('ativado');
+        });
+
+        // Caso o toque seja cancelado abruptamente pelo sistema (ex: uma notificação na tela)
+        caixa.addEventListener('touchcancel', () => {
+            clearTimeout(temporizadorHold);
+            podeMover = false;
+            caixa.classList.remove('ativado');
+        });
+    </script>
+</body>
+
+</html>

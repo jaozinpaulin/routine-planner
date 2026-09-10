@@ -193,7 +193,10 @@ export default function App() {
 
         <BlockPickers
           onSelectBlock={handleQuickAdd}
+          activeDayKey={mobileActiveDay}
+          onSelectDay={setMobileActiveDay}
           activeDayLabel={currentDayInfo.label}
+          daysCount={daysCount}
         />
 
         {/* Abas no Mobile */}

@@ -9,70 +9,14 @@ export const ICONS = {
 };
 
 export const COLORS = {
-    emerald: {
-        dot: 'bg-emerald-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-emerald-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    amber: {
-        dot: 'bg-amber-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-amber-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    orange: {
-        dot: 'bg-[#d97757]',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-[#d97757]',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    teal: {
-        dot: 'bg-teal-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-teal-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    cyan: {
-        dot: 'bg-cyan-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-cyan-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    indigo: {
-        dot: 'bg-indigo-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-indigo-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    violet: {
-        dot: 'bg-violet-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-violet-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
-    rose: {
-        dot: 'bg-rose-500',
-        bg: 'bg-zinc-900/80 hover:bg-zinc-900',
-        border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-rose-500',
-        text: 'text-zinc-200',
-        btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
-    },
+    emerald: { dot: 'bg-emerald-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-emerald-500' },
+    amber: { dot: 'bg-amber-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-amber-500' },
+    orange: { dot: 'bg-[#d97757]', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-[#d97757]' },
+    teal: { dot: 'bg-teal-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-teal-500' },
+    cyan: { dot: 'bg-cyan-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-cyan-500' },
+    indigo: { dot: 'bg-indigo-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-indigo-500' },
+    violet: { dot: 'bg-violet-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-violet-500' },
+    rose: { dot: 'bg-rose-500', bg: 'bg-zinc-900/80 hover:bg-zinc-900', border: 'border-zinc-800/80 hover:border-zinc-700', icon: 'text-rose-500' },
 };
 
 const INITIAL_ITEMS = [
@@ -92,7 +36,17 @@ const INITIAL_ITEMS = [
     { id: 'musica', title: 'Relaxar / Música', icon: 'Music', color: 'violet' },
 ];
 
-export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
+const DAYS_LIST = [
+    { key: 'seg', label: 'Segunda' },
+    { key: 'ter', label: 'Terça' },
+    { key: 'qua', label: 'Quarta' },
+    { key: 'qui', label: 'Quinta' },
+    { key: 'sex', label: 'Sexta' },
+    { key: 'sab', label: 'Sábado' },
+    { key: 'dom', label: 'Domingo' },
+];
+
+export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay, activeDayLabel, daysCount = 5 }) {
     const [editingItem, setEditingItem] = useState(null);
     const [title, setTitle] = useState('');
     const [start, setStart] = useState('00:00');
@@ -132,26 +86,49 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
         setEditingItem(null);
     };
 
-    const startDrag = (e, item) => {
-        const theme = COLORS[item.color] || COLORS.orange;
-        e.dataTransfer.setData('application/json', JSON.stringify({ type: 'picker-block', item: { ...item, start: '00:00', end: '00:00', theme } }));
-        e.dataTransfer.effectAllowed = 'copy';
-    };
-
     const activeTheme = editingItem ? (COLORS[editingItem.color] || COLORS.orange) : COLORS.orange;
     const ActiveIcon = editingItem ? (ICONS[editingItem.icon] || ICONS.Sparkles) : null;
+    const availableDays = daysCount === 5 ? DAYS_LIST.slice(0, 5) : DAYS_LIST;
 
     return (
-        <section className="bg-zinc-900/40 border border-zinc-800/60 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden relative">
-            <div className="flex items-center justify-between mb-3 px-1">
+        <section className="bg-zinc-900/40 border border-zinc-800/60 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden relative space-y-3">
+            {/* Seletor de dias ativo no topo */}
+            {onSelectDay && (
+                <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2 border-b border-zinc-800/60 scrollbar-none">
+                    <span className="text-xs font-medium text-zinc-400 shrink-0">
+                        Dia selecionado para adição:
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        {availableDays.map((d) => {
+                            const isSelected = activeDayKey === d.key;
+                            return (
+                                <button
+                                    key={d.key}
+                                    type="button"
+                                    onClick={() => onSelectDay(d.key)}
+                                    className={`px-3 py-1 text-xs font-medium rounded-lg transition-all cursor-pointer shrink-0 ${isSelected
+                                        ? 'bg-[#d97757] text-white shadow-sm font-semibold'
+                                        : 'bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300'
+                                        }`}
+                                >
+                                    {d.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            <div className="flex items-center justify-between px-1">
                 <span className="text-xs font-semibold text-zinc-300">
-                    Blocos rápidos
+                    Blocos rápidos (Toque para adicionar)
                 </span>
-                <span className="text-[11px] text-zinc-400">
-                    Toque para adicionar {activeDayLabel ? `em ${activeDayLabel}` : ''}
+                <span className="text-xs text-zinc-400">
+                    Alvo: <strong className="text-[#d97757]">{activeDayLabel || 'Selecionado'}</strong>
                 </span>
             </div>
 
+            {/* Grade de blocos rápidos (Apenas cliques limpos, sem drag and drop conflitante) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
                 {INITIAL_ITEMS.map((item) => {
                     const IconComp = ICONS[item.icon] || ICONS.Sparkles;
@@ -160,8 +137,6 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                     return (
                         <div
                             key={item.id}
-                            draggable
-                            onDragStart={(e) => startDrag(e, item)}
                             onClick={() => handleCardClick(item)}
                             className={`group relative p-2.5 sm:p-3 flex items-center justify-between overflow-hidden rounded-xl border transition-all cursor-pointer active:scale-98 select-none ${theme.bg} ${theme.border}`}
                         >
@@ -181,12 +156,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
-            {/* Modal com posição fixa estática para evitar trepidação com teclado */}
+            {/* Modal de Definição de Horários */}
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
                     <div
                         ref={modalRef}
-                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 transform-gpu"
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
@@ -232,8 +208,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         Início
                                     </label>
                                     <input
-                                        type="text"
-                                        inputMode="numeric"
+                                        type="tel"
                                         maxLength={5}
                                         value={start}
                                         onChange={(e) => setStart(maskTimeInput(e.target.value))}
@@ -246,8 +221,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         Fim
                                     </label>
                                     <input
-                                        type="text"
-                                        inputMode="numeric"
+                                        type="tel"
                                         maxLength={5}
                                         value={end}
                                         onChange={(e) => setEnd(maskTimeInput(e.target.value))}
