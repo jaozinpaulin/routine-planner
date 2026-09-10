@@ -10,18 +10,18 @@ export const ICONS = {
 
 export const COLORS = {
     emerald: {
-        dot: 'bg-emerald-400',
+        dot: 'bg-emerald-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-emerald-400',
+        icon: 'text-emerald-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     amber: {
-        dot: 'bg-amber-400',
+        dot: 'bg-amber-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-amber-400',
+        icon: 'text-amber-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
@@ -34,42 +34,42 @@ export const COLORS = {
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     teal: {
-        dot: 'bg-teal-400',
+        dot: 'bg-teal-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-teal-400',
+        icon: 'text-teal-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     cyan: {
-        dot: 'bg-cyan-400',
+        dot: 'bg-cyan-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-cyan-400',
+        icon: 'text-cyan-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     indigo: {
-        dot: 'bg-indigo-400',
+        dot: 'bg-indigo-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-indigo-400',
+        icon: 'text-indigo-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     violet: {
-        dot: 'bg-violet-400',
+        dot: 'bg-violet-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-violet-400',
+        icon: 'text-violet-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
     rose: {
-        dot: 'bg-rose-400',
+        dot: 'bg-rose-500',
         bg: 'bg-zinc-900/80 hover:bg-zinc-900',
         border: 'border-zinc-800/80 hover:border-zinc-700',
-        icon: 'text-rose-400',
+        icon: 'text-rose-500',
         text: 'text-zinc-200',
         btn: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-700',
     },
@@ -95,8 +95,8 @@ const INITIAL_ITEMS = [
 export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
     const [editingItem, setEditingItem] = useState(null);
     const [title, setTitle] = useState('');
-    const [start, setStart] = useState('08:00');
-    const [end, setEnd] = useState('09:00');
+    const [start, setStart] = useState('00:00');
+    const [end, setEnd] = useState('00:00');
     const modalRef = useRef(null);
 
     useEffect(() => {
@@ -114,8 +114,8 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
     const handleCardClick = (item) => {
         setEditingItem(item);
         setTitle(item.title);
-        setStart('08:00');
-        setEnd('09:00');
+        setStart('00:00');
+        setEnd('00:00');
     };
 
     const handleConfirm = (e) => {
@@ -125,8 +125,8 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
         onSelectBlock && onSelectBlock({
             ...editingItem,
             title: title.trim(),
-            start: normalizeTime(start, '08:00'),
-            end: normalizeTime(end, '09:00'),
+            start: normalizeTime(start, '00:00'),
+            end: normalizeTime(end, '00:00'),
         });
 
         setEditingItem(null);
@@ -134,7 +134,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
 
     const startDrag = (e, item) => {
         const theme = COLORS[item.color] || COLORS.orange;
-        e.dataTransfer.setData('application/json', JSON.stringify({ ...item, theme }));
+        e.dataTransfer.setData('application/json', JSON.stringify({ ...item, start: '00:00', end: '00:00', theme }));
         e.dataTransfer.effectAllowed = 'copy';
     };
 
@@ -167,7 +167,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                         >
                             <div className="flex items-center gap-2.5 min-w-0">
                                 <IconComp
-                                    strokeWidth={2}
+                                    strokeWidth={1.8}
                                     className={`w-4 h-4 shrink-0 ${theme.icon}`}
                                 />
                                 <span className="text-xs font-medium leading-tight truncate text-zinc-200 group-hover:text-white">
@@ -181,7 +181,6 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
-            {/* Modal Inline ao clicar */}
             {editingItem && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs">
                     <div
@@ -191,7 +190,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
-                                    {ActiveIcon && <ActiveIcon strokeWidth={2} className={`w-4 h-4 ${activeTheme.icon}`} />}
+                                    {ActiveIcon && <ActiveIcon strokeWidth={1.8} className={`w-4 h-4 ${activeTheme.icon}`} />}
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-semibold text-[#d97757] uppercase tracking-wider block">
@@ -237,9 +236,9 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         maxLength={5}
                                         value={start}
                                         onChange={(e) => setStart(maskTimeInput(e.target.value))}
-                                        onBlur={(e) => setStart(normalizeTime(e.target.value, '08:00'))}
+                                        onBlur={(e) => setStart(normalizeTime(e.target.value, '00:00'))}
                                         className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
-                                        placeholder="08:00"
+                                        placeholder="00:00"
                                     />
                                 </div>
                                 <div>
@@ -252,9 +251,9 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         maxLength={5}
                                         value={end}
                                         onChange={(e) => setEnd(maskTimeInput(e.target.value))}
-                                        onBlur={(e) => setEnd(normalizeTime(e.target.value, '09:00'))}
+                                        onBlur={(e) => setEnd(normalizeTime(e.target.value, '00:00'))}
                                         className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
-                                        placeholder="09:00"
+                                        placeholder="00:00"
                                     />
                                 </div>
                             </div>

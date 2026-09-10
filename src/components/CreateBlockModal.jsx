@@ -9,8 +9,8 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     const [title, setTitle] = useState('');
     const [icon, setIcon] = useState('BookOpen');
     const [color, setColor] = useState('orange');
-    const [start, setStart] = useState('08:00');
-    const [end, setEnd] = useState('09:00');
+    const [start, setStart] = useState('00:00');
+    const [end, setEnd] = useState('00:00');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -20,15 +20,15 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
             title: title.trim(),
             icon,
             color,
-            start: normalizeTime(start, '08:00'),
-            end: normalizeTime(end, '09:00'),
+            start: normalizeTime(start, '00:00'),
+            end: normalizeTime(end, '00:00'),
         });
 
         setTitle('');
         setIcon('BookOpen');
         setColor('orange');
-        setStart('08:00');
-        setEnd('09:00');
+        setStart('00:00');
+        setEnd('00:00');
         onClose();
     };
 
@@ -73,7 +73,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     <div className="flex items-center gap-1.5 relative z-10">
                         <span className={`w-2 h-2 rounded-full ${previewTheme.dot}`} />
                         <span className="text-[11px] font-mono text-zinc-400">
-                            {start || '08:00'} - {end || '09:00'}
+                            {start || '00:00'} - {end || '00:00'}
                         </span>
                     </div>
                     <span className="relative z-10 text-xs font-semibold pr-10 truncate text-zinc-100">
@@ -105,10 +105,10 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                                 type="text"
                                 inputMode="numeric"
                                 maxLength={5}
-                                placeholder="08:00"
+                                placeholder="00:00"
                                 value={start}
                                 onChange={(e) => setStart(maskTimeInput(e.target.value))}
-                                onBlur={(e) => setStart(normalizeTime(e.target.value, '08:00'))}
+                                onBlur={(e) => setStart(normalizeTime(e.target.value, '00:00'))}
                                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3 py-2 text-sm font-mono text-center text-zinc-100 outline-none"
                             />
                         </div>
@@ -120,10 +120,10 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                                 type="text"
                                 inputMode="numeric"
                                 maxLength={5}
-                                placeholder="09:00"
+                                placeholder="00:00"
                                 value={end}
                                 onChange={(e) => setEnd(maskTimeInput(e.target.value))}
-                                onBlur={(e) => setEnd(normalizeTime(e.target.value, '09:00'))}
+                                onBlur={(e) => setEnd(normalizeTime(e.target.value, '00:00'))}
                                 className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3 py-2 text-sm font-mono text-center text-zinc-100 outline-none"
                             />
                         </div>

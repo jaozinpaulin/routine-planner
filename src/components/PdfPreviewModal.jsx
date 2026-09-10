@@ -4,7 +4,7 @@ import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { ICONS, COLORS } from './BlockPickers';
 
-export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule }) {
+export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule, targetedDay }) {
     if (!isOpen) return null;
 
     const printRef = useRef(null);
@@ -12,7 +12,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
     const [isGenerating, setIsGenerating] = useState(false);
     const [scale, setScale] = useState(1);
 
-    // Ajusta a escala da miniatura para o container da tela
     useEffect(() => {
         const updateScale = () => {
             if (containerRef.current) {
@@ -44,12 +43,9 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
             const elementWidth = element.offsetWidth;
             const elementHeight = element.offsetHeight;
 
-            // Largura fixa A4 Paisagem (297mm)
             const pdfWidth = 297;
-            // Altura proporcional exata baseada na largura da folha
             const calculatedHeight = (elementHeight * pdfWidth) / elementWidth;
 
-            // Cria o PDF com as dimensões exatas da imagem
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'mm',
@@ -59,11 +55,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
             const pageW = pdf.internal.pageSize.getWidth();
             const pageH = pdf.internal.pageSize.getHeight();
 
-            // Preenche o fundo com a mesma cor escura para evitar qualquer borda branca de sobra
-            pdf.setFillColor(18, 18, 20); // #121214
+            pdf.setFillColor(18, 18, 20);
             pdf.rect(0, 0, pageW, pageH, 'F');
-
-            // Renderiza ocupando a largura total (sem folga na direita)
             pdf.addImage(imgData, 'PNG', 0, 0, pageW, calculatedHeight, undefined, 'FAST');
 
             const blob = pdf.output('blob');
@@ -83,6 +76,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
             setIsGenerating(false);
         }
     };
+
     const is7Days = activeDays.length === 7;
 
     return (
@@ -94,7 +88,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                 onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-5xl bg-[#161618] border border-zinc-800 rounded-2xl flex flex-col max-h-[94vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
             >
-                {/* Topbar do modal */}
                 <div className="flex items-center justify-between gap-3 px-3.5 sm:px-6 py-3 border-b border-zinc-800 bg-[#141416] shrink-0">
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
@@ -140,7 +133,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                     </div>
                 </div>
 
-                {/* Área com escala automática para visualização no modal */}
                 <div
                     ref={containerRef}
                     className="flex-1 overflow-auto p-3 sm:p-5 bg-zinc-950/80 flex items-start justify-center [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-800/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700"
@@ -159,15 +151,12 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                             }}
                             className="absolute top-0 left-0"
                         >
-                            {/* Folha proporcional sem altura travada, se adaptando ao conteúdo */}
                             <div
                                 ref={printRef}
                                 style={{ width: '1060px', minHeight: '750px' }}
                                 className="bg-[#121214] text-zinc-100 p-8 flex flex-col justify-between border border-zinc-800/80 shadow-2xl rounded-2xl shrink-0 box-border select-none"
                             >
-                                {/* Bloco Superior: Cabeçalho + Colunas */}
                                 <div>
-                                    {/* Cabeçalho do documento */}
                                     <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-zinc-800">
                                         <div>
                                             <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
@@ -188,23 +177,29 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                                         </div>
                                     </div>
 
-                                    {/* Grade de colunas - flexível e natural */}
                                     <div className={`grid gap-2.5 items-start ${is7Days ? 'grid-cols-7' : 'grid-cols-5'}`}>
                                         {activeDays.map((day) => {
                                             const blocks = schedule[day.key] || [];
                                             const isWeekend = day.key === 'sab' || day.key === 'dom';
+                                            const isTarget = day.key === targetedDay;
 
                                             return (
                                                 <div
                                                     key={day.key}
-                                                    className={`rounded-xl border flex flex-col overflow-hidden min-h-[440px] ${isWeekend
-                                                        ? 'bg-[#161619] border-zinc-800/70'
-                                                        : 'bg-zinc-900/50 border-zinc-800/90'
+                                                    className={`rounded-xl border flex flex-col overflow-hidden min-h-[440px] ${isTarget
+                                                        ? 'border-[#d97757]/50 bg-zinc-900/60 shadow-sm'
+                                                        : isWeekend
+                                                            ? 'bg-[#161619] border-zinc-800/70'
+                                                            : 'bg-zinc-900/50 border-zinc-800/90'
                                                         }`}
                                                 >
-                                                    {/* Header do dia */}
-                                                    <div className="px-3 py-2 border-b border-zinc-800/80 bg-zinc-950/40 rounded-t-xl flex items-center justify-between shrink-0">
-                                                        <span className={`text-[11px] font-bold truncate ${isWeekend ? 'text-orange-300' : 'text-zinc-200'
+                                                    <div className={`px-3 py-2 border-b bg-zinc-950/40 rounded-t-xl flex items-center justify-between shrink-0 ${isTarget ? 'border-[#d97757]/30' : 'border-zinc-800/80'
+                                                        }`}>
+                                                        <span className={`text-[11px] font-bold truncate ${isTarget
+                                                            ? 'text-[#d97757]'
+                                                            : isWeekend
+                                                                ? 'text-[#d97757]/90'
+                                                                : 'text-zinc-200'
                                                             }`}>
                                                             {day.label}
                                                         </span>
@@ -215,7 +210,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                                                         )}
                                                     </div>
 
-                                                    {/* Lista dos cards */}
                                                     <div className="p-1.5 flex flex-col gap-1.5 flex-1">
                                                         {blocks.length === 0 ? (
                                                             <div className="py-8 flex items-center justify-center flex-1">
@@ -233,9 +227,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                                                                         key={block.id}
                                                                         className="relative p-2 rounded-lg border border-zinc-800 bg-zinc-900/90 flex flex-col justify-between min-h-[46px] overflow-hidden shrink-0"
                                                                     >
-                                                                        {/* Ícone com opacidade sutil à direita */}
-                                                                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-30">
-                                                                            <IconComp strokeWidth={1.5} className={`w-5 h-5 ${theme.icon}`} />
+                                                                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                                                                            <IconComp strokeWidth={1.8} className={`w-4 h-4 ${theme.icon}`} />
                                                                         </div>
 
                                                                         <div className="flex items-center gap-1.5 relative z-10">
@@ -259,7 +252,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule 
                                     </div>
                                 </div>
 
-                                {/* Rodapé simples e limpo no final da folha */}
                                 <div className="pt-4 mt-4 border-t border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 shrink-0">
                                     <span>Routine Planner</span>
                                     <span>github.com/jaozinpaulin</span>

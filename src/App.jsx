@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import BlockPickers from './components/BlockPickers';
 import DayColumn from './components/DayColumn';
@@ -30,10 +30,30 @@ const INITIAL_SCHEDULE = {
 };
 
 export default function App() {
-  const [daysCount, setDaysCount] = useState(5);
+  // Carrega contagem de dias com fallback padrão em 5
+  const [daysCount, setDaysCount] = useState(() => {
+    const saved = localStorage.getItem('routine_days_count');
+    return saved ? Number(saved) : 5;
+  });
+
   const activeDays = daysCount === 5 ? DAYS_5 : DAYS_7;
   const [mobileActiveDay, setMobileActiveDay] = useState('seg');
-  const [schedule, setSchedule] = useState(INITIAL_SCHEDULE);
+  const [targetedDay, setTargetedDay] = useState(() => {
+    return localStorage.getItem('routine_targeted_day') || null;
+  });
+
+  // Carrega dados salvos no localStorage
+  const [schedule, setSchedule] = useState(() => {
+    const saved = localStorage.getItem('routine_schedule_data');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (err) {
+        console.error('Erro ao ler localStorage:', err);
+      }
+    }
+    return INITIAL_SCHEDULE;
+  });
 
   const [modalState, setModalState] = useState({
     isOpen: false,
@@ -43,7 +63,25 @@ export default function App() {
 
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
 
-  // Aciona a visualização prévia do PDF
+  // Salva no localStorage a cada alteração da rotina
+  useEffect(() => {
+    localStorage.setItem('routine_schedule_data', JSON.stringify(schedule));
+  }, [schedule]);
+
+  // Salva a contagem de dias
+  useEffect(() => {
+    localStorage.setItem('routine_days_count', String(daysCount));
+  }, [daysCount]);
+
+  // Salva o dia marcado como alvo
+  useEffect(() => {
+    if (targetedDay) {
+      localStorage.setItem('routine_targeted_day', targetedDay);
+    } else {
+      localStorage.removeItem('routine_targeted_day');
+    }
+  }, [targetedDay]);
+
   const handleOpenPdfPreview = () => {
     setIsPdfPreviewOpen(true);
   };
@@ -54,8 +92,8 @@ export default function App() {
       title: item.title,
       icon: item.icon,
       color: item.color,
-      start: item.start || '08:00',
-      end: item.end || '09:00',
+      start: item.start || '00:00',
+      end: item.end || '00:00',
     };
 
     setSchedule((prev) => ({
@@ -67,6 +105,10 @@ export default function App() {
   const handleQuickAdd = (configuredItem) => {
     const targetDay = mobileActiveDay;
     handleDropBlock(targetDay, configuredItem);
+  };
+
+  const handleToggleTarget = (dayKey) => {
+    setTargetedDay((prev) => (prev === dayKey ? null : dayKey));
   };
 
   const handleAddClick = (dayKey) => {
@@ -157,6 +199,8 @@ export default function App() {
           {activeDays.map((d) => {
             const isCurrent = d.key === mobileActiveDay;
             const count = (schedule[d.key] || []).length;
+            const isTarget = d.key === targetedDay;
+
             return (
               <button
                 key={d.key}
@@ -164,7 +208,9 @@ export default function App() {
                 onClick={() => setMobileActiveDay(d.key)}
                 className={`flex-1 min-w-[48px] py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${isCurrent
                   ? 'bg-[#d97757] text-white shadow-xs'
-                  : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
+                  : isTarget
+                    ? 'border border-[#d97757]/60 text-zinc-200 bg-zinc-900'
+                    : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
                   }`}
               >
                 <span>{d.short}</span>
@@ -196,6 +242,8 @@ export default function App() {
                   dayLabel={day.label}
                   isWeekend={day.key === 'sab' || day.key === 'dom'}
                   blocks={schedule[day.key] || []}
+                  isTargeted={day.key === targetedDay}
+                  onToggleTarget={handleToggleTarget}
                   onDropBlock={handleDropBlock}
                   onAddClick={handleAddClick}
                   onUpdateBlock={handleUpdateBlock}
@@ -209,14 +257,13 @@ export default function App() {
         </main>
       </div>
 
-      {/* Modal de Prévia e Download do PDF */}
       <PdfPreviewModal
         isOpen={isPdfPreviewOpen}
         onClose={() => setIsPdfPreviewOpen(false)}
         activeDays={activeDays}
         schedule={schedule}
+        targetedDay={targetedDay}
       />
-
       <CreateBlockModal
         isOpen={modalState.isOpen}
         dayLabel={modalState.dayLabel}
