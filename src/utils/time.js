@@ -1,7 +1,3 @@
-/**
- * Aplica máscara com validação em tempo real.
- * Impede valores irreais como 55:77 já durante a digitação.
- */
 export function maskTimeInput(raw) {
     const digits = raw.replace(/\D/g, '').slice(0, 4);
 
@@ -15,10 +11,9 @@ export function maskTimeInput(raw) {
 
     if (digits.length <= 2) return h;
 
-    // Validação dos Minutos (máximo 59)
     let m = digits.slice(2, 4);
     if (m.length === 1 && parseInt(m, 10) > 5) {
-        m = '5'; // Primeiro dígito do minuto não passa de 5 (50-59)
+        m = '5';
     } else if (m.length === 2 && parseInt(m, 10) > 59) {
         m = '59';
     }
@@ -26,10 +21,6 @@ export function maskTimeInput(raw) {
     return `${h}:${m}`;
 }
 
-/**
- * Normaliza e sanitiza o valor final quando o usuário sai do campo (onBlur) ou dá Enter.
- * Se o campo estiver incompleto ou inválido, ajusta com segurança para um horário real.
- */
 export function normalizeTime(raw, fallback = '08:00') {
     if (!raw || !raw.trim()) return fallback;
 
