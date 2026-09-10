@@ -30,15 +30,14 @@ export default function DayColumn({
 }) {
     const [isOver, setIsOver] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({ title: '', start: '00:00', end: '00:00' });
     const [showCopyMenu, setShowCopyMenu] = useState(false);
     const [selectedTargets, setSelectedTargets] = useState([]);
     const [draggedCardIndex, setDraggedCardIndex] = useState(null);
-    const [dropPosition, setDropPosition] = useState(null); // { index: number, place: 'before' | 'after' }
-    const copyMenuRef = useRef(null);
+    const [dropPosition, setDropPosition] = useState(null);
 
-    // Referência para toque no mobile
+    const copyMenuRef = useRef(null);
     const touchStartIndexRef = useRef(null);
-    const touchCurrentTargetRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -52,7 +51,28 @@ export default function DayColumn({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showCopyMenu]);
 
-    // Drag & drop padrão (Desktop)
+    // Ao abrir edição, isola os valores para não dar pulos com re-render de estado global
+    const handleStartEdit = (block) => {
+        setEditingId(block.id);
+        setEditForm({
+            title: block.title,
+            start: block.start || '00:00',
+            end: block.end || '00:00',
+        });
+    };
+
+    const handleSaveEdit = (blockId) => {
+        if (onUpdateBlock) {
+            onUpdateBlock(dayKey, blockId, {
+                title: editForm.title.trim() || 'Sem título',
+                start: normalizeTime(editForm.start, '00:00'),
+                end: normalizeTime(editForm.end, '00:00'),
+            });
+        }
+        setEditingId(null);
+    };
+
+    // Drag & Drop Desktop
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -99,7 +119,7 @@ export default function DayColumn({
                 onDropBlock(dayKey, blockItem);
             }
         } catch (err) {
-            console.error('Erro no drop da coluna:', err);
+            console.error('Erro drop coluna:', err);
         }
     };
 
@@ -138,18 +158,14 @@ export default function DayColumn({
             const place = dropPosition?.place || 'after';
 
             let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
-            if (fromIndex < insertIndex) {
-                insertIndex -= 1;
-            }
+            if (fromIndex < insertIndex) insertIndex -= 1;
 
             if (fromIndex !== insertIndex) {
                 const updated = [...blocks];
                 const [movedCard] = updated.splice(fromIndex, 1);
                 updated.splice(insertIndex, 0, movedCard);
 
-                if (onReorderBlocks) {
-                    onReorderBlocks(dayKey, updated);
-                }
+                if (onReorderBlocks) onReorderBlocks(dayKey, updated);
             }
 
             setDraggedCardIndex(null);
@@ -161,12 +177,7 @@ export default function DayColumn({
         handleDrop(e);
     };
 
-    const handleCardDragEnd = () => {
-        setDraggedCardIndex(null);
-        setDropPosition(null);
-    };
-
-    // Suporte a Touch para Mobile (Reordenação)
+    // Touch nativo infalível para mobile
     const handleTouchStart = (e, index) => {
         touchStartIndexRef.current = index;
         setDraggedCardIndex(index);
@@ -175,39 +186,46 @@ export default function DayColumn({
     const handleTouchMove = (e) => {
         if (touchStartIndexRef.current === null) return;
         const touch = e.touches[0];
-        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-        const cardElement = targetElement ? targetElement.closest('[data-card-index]') : null;
+        const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardElem = elem ? elem.closest('[data-card-index]') : null;
 
-        if (cardElement) {
-            const targetIdx = Number(cardElement.getAttribute('data-card-index'));
-            touchCurrentTargetRef.current = targetIdx;
-            const rect = cardElement.getBoundingClientRect();
+        if (cardElem) {
+            const targetIdx = Number(cardElem.getAttribute('data-card-index'));
+            const rect = cardElem.getBoundingClientRect();
             const midY = rect.top + rect.height / 2;
             const place = touch.clientY < midY ? 'before' : 'after';
             setDropPosition({ index: targetIdx, place });
         }
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e) => {
         const fromIndex = touchStartIndexRef.current;
-        const targetIndex = touchCurrentTargetRef.current;
+        const touch = e.changedTouches ? e.changedTouches[0] : null;
 
-        if (fromIndex !== null && targetIndex !== null && fromIndex !== targetIndex) {
-            const place = dropPosition?.place || 'after';
-            let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
-            if (fromIndex < insertIndex) insertIndex -= 1;
+        if (fromIndex !== null && touch) {
+            const elem = document.elementFromPoint(touch.clientX, touch.clientY);
+            const cardElem = elem ? elem.closest('[data-card-index]') : null;
 
-            const updated = [...blocks];
-            const [movedCard] = updated.splice(fromIndex, 1);
-            updated.splice(insertIndex, 0, movedCard);
+            if (cardElem) {
+                const targetIndex = Number(cardElem.getAttribute('data-card-index'));
+                if (fromIndex !== targetIndex) {
+                    const rect = cardElem.getBoundingClientRect();
+                    const midY = rect.top + rect.height / 2;
+                    const place = touch.clientY < midY ? 'before' : 'after';
 
-            if (onReorderBlocks) {
-                onReorderBlocks(dayKey, updated);
+                    let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
+                    if (fromIndex < insertIndex) insertIndex -= 1;
+
+                    const updated = [...blocks];
+                    const [movedCard] = updated.splice(fromIndex, 1);
+                    updated.splice(insertIndex, 0, movedCard);
+
+                    if (onReorderBlocks) onReorderBlocks(dayKey, updated);
+                }
             }
         }
 
         touchStartIndexRef.current = null;
-        touchCurrentTargetRef.current = null;
         setDraggedCardIndex(null);
         setDropPosition(null);
     };
@@ -228,9 +246,7 @@ export default function DayColumn({
 
     const handleClear = () => {
         if (blocks.length === 0) return;
-        if (onClearDay) {
-            onClearDay(dayKey);
-        }
+        if (onClearDay) onClearDay(dayKey);
     };
 
     const totalBlocks = Array.isArray(blocks) ? blocks.length : 0;
@@ -402,10 +418,8 @@ export default function DayColumn({
                                     <div className="flex items-center justify-between gap-2">
                                         <input
                                             type="text"
-                                            value={block.title}
-                                            onChange={(e) =>
-                                                onUpdateBlock(dayKey, block.id, { title: e.target.value })
-                                            }
+                                            value={editForm.title}
+                                            onChange={(e) => setEditForm((prev) => ({ ...prev, title: e.target.value }))}
                                             className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-medium text-zinc-100 outline-none focus:border-[#d97757]"
                                             placeholder="Nome da atividade"
                                         />
@@ -419,20 +433,17 @@ export default function DayColumn({
                                         </button>
                                     </div>
 
+                                    {/* Inputs com estado local: sem "piques" ao alternar foco */}
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="flex flex-col">
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
-                                                value={block.start}
                                                 maxLength={5}
+                                                value={editForm.start}
                                                 onChange={(e) => {
                                                     const masked = maskTimeInput(e.target.value);
-                                                    onUpdateBlock(dayKey, block.id, { start: masked });
-                                                }}
-                                                onBlur={(e) => {
-                                                    const finalTime = normalizeTime(e.target.value, '00:00');
-                                                    onUpdateBlock(dayKey, block.id, { start: finalTime });
+                                                    setEditForm((prev) => ({ ...prev, start: masked }));
                                                 }}
                                                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="00:00"
@@ -444,15 +455,11 @@ export default function DayColumn({
                                             <input
                                                 type="text"
                                                 inputMode="numeric"
-                                                value={block.end}
                                                 maxLength={5}
+                                                value={editForm.end}
                                                 onChange={(e) => {
                                                     const masked = maskTimeInput(e.target.value);
-                                                    onUpdateBlock(dayKey, block.id, { end: masked });
-                                                }}
-                                                onBlur={(e) => {
-                                                    const finalTime = normalizeTime(e.target.value, '00:00');
-                                                    onUpdateBlock(dayKey, block.id, { end: finalTime });
+                                                    setEditForm((prev) => ({ ...prev, end: masked }));
                                                 }}
                                                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 text-xs font-mono text-center text-zinc-100 outline-none focus:border-[#d97757]"
                                                 placeholder="00:00"
@@ -463,7 +470,7 @@ export default function DayColumn({
 
                                     <button
                                         type="button"
-                                        onClick={() => setEditingId(null)}
+                                        onClick={() => handleSaveEdit(block.id)}
                                         className="w-full py-2 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
                                     >
                                         <Check className="w-4 h-4" />
@@ -481,11 +488,14 @@ export default function DayColumn({
                                 onDragStart={(e) => handleCardDragStart(e, index)}
                                 onDragOver={(e) => handleCardDragOver(e, index)}
                                 onDrop={(e) => handleCardDrop(e, index)}
-                                onDragEnd={handleCardDragEnd}
+                                onDragEnd={() => {
+                                    setDraggedCardIndex(null);
+                                    setDropPosition(null);
+                                }}
                                 onTouchStart={(e) => handleTouchStart(e, index)}
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
-                                onClick={() => setEditingId(block.id)}
+                                onClick={() => handleStartEdit(block)}
                                 className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
                                     }`}
                             >
