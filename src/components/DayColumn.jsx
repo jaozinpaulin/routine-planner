@@ -38,14 +38,6 @@ export default function DayColumn({
 
     const copyMenuRef = useRef(null);
 
-    // Variáveis com estado em ref para o Touch não perder referências em render
-    const longPressTimerRef = useRef(null);
-    const isDraggingMobileRef = useRef(false);
-    const dragSourceIndexRef = useRef(null);
-    const dragTargetIndexRef = useRef(null);
-    const dragTargetPlaceRef = useRef('after');
-    const touchOriginRef = useRef({ x: 0, y: 0 });
-
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (copyMenuRef.current && !copyMenuRef.current.contains(e.target)) {
@@ -59,7 +51,6 @@ export default function DayColumn({
     }, [showCopyMenu]);
 
     const handleStartEdit = (block) => {
-        if (isDraggingMobileRef.current) return;
         setEditingId(block.id);
         setEditForm({
             title: block.title,
@@ -98,7 +89,7 @@ export default function DayColumn({
         }
     };
 
-    // Drag Desktop
+    // Drag & Drop Desktop
     const handleDragOver = (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'move';
@@ -182,84 +173,6 @@ export default function DayColumn({
         handleDrop(e);
     };
 
-    // Touch Mobile com Long-Press e Trava Precisa de Soltura
-    const handleTouchStart = (e, index) => {
-        const touch = e.touches[0];
-        touchOriginRef.current = { x: touch.clientX, y: touch.clientY };
-        dragSourceIndexRef.current = index;
-        dragTargetIndexRef.current = index;
-        dragTargetPlaceRef.current = 'after';
-        isDraggingMobileRef.current = false;
-
-        // Segurar por 220ms ativa o modo de reordenação
-        longPressTimerRef.current = setTimeout(() => {
-            isDraggingMobileRef.current = true;
-            setDraggedCardIndex(index);
-            if (window.navigator?.vibrate) {
-                window.navigator.vibrate(40);
-            }
-        }, 220);
-    };
-
-    const handleTouchMove = (e) => {
-        const touch = e.touches[0];
-
-        // Se moveu antes de 220ms, cancela: é scroll da tela do usuário
-        if (!isDraggingMobileRef.current) {
-            const dx = Math.abs(touch.clientX - touchOriginRef.current.x);
-            const dy = Math.abs(touch.clientY - touchOriginRef.current.y);
-            if (dx > 10 || dy > 10) {
-                clearTimeout(longPressTimerRef.current);
-            }
-            return;
-        }
-
-        // Se está no modo arrasto, trava o scroll da página
-        if (e.cancelable) {
-            e.preventDefault();
-        }
-
-        // Identifica qual card está sob o dedo
-        const element = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!element) return;
-
-        const cardElement = element.closest('[data-card-index]');
-        if (cardElement) {
-            const index = Number(cardElement.getAttribute('data-card-index'));
-            const rect = cardElement.getBoundingClientRect();
-            const midY = rect.top + rect.height / 2;
-            const place = touch.clientY < midY ? 'before' : 'after';
-
-            dragTargetIndexRef.current = index;
-            dragTargetPlaceRef.current = place;
-            setDropPosition({ index, place });
-        }
-    };
-
-    const handleTouchEnd = () => {
-        clearTimeout(longPressTimerRef.current);
-
-        if (isDraggingMobileRef.current) {
-            const from = dragSourceIndexRef.current;
-            const to = dragTargetIndexRef.current;
-            const place = dragTargetPlaceRef.current;
-
-            if (from !== null && to !== null) {
-                applyReorder(from, to, place);
-            }
-        }
-
-        // Pequeno atraso para evitar que o clique de soltar acione o modal
-        setTimeout(() => {
-            isDraggingMobileRef.current = false;
-        }, 80);
-
-        dragSourceIndexRef.current = null;
-        dragTargetIndexRef.current = null;
-        setDraggedCardIndex(null);
-        setDropPosition(null);
-    };
-
     const toggleCopyTarget = (targetKey) => {
         setSelectedTargets((prev) =>
             prev.includes(targetKey) ? prev.filter((k) => k !== targetKey) : [...prev, targetKey]
@@ -318,7 +231,7 @@ export default function DayColumn({
                             type="button"
                             onClick={() => onClearDay && onClearDay(dayKey)}
                             title="Limpar dia"
-                            className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer ml-0.5 print:hidden"
+                            className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer ml-0.5 print:hidden"
                         >
                             <Trash2 className="w-4 h-4" />
                         </button>
@@ -330,7 +243,7 @@ export default function DayColumn({
                         type="button"
                         onClick={() => onToggleTarget && onToggleTarget(dayKey)}
                         title={isTargeted ? 'Desafixar dia' : 'Fixar/destacar dia'}
-                        className={`p-2 rounded-lg cursor-pointer ${isTargeted ? 'text-[#d97757] bg-[#d97757]/15' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
+                        className={`p-2 rounded-lg transition-colors cursor-pointer ${isTargeted ? 'text-[#d97757] bg-[#d97757]/15' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                             }`}
                     >
                         <Pin className={`w-3.5 h-3.5 ${isTargeted ? 'fill-current' : ''}`} />
@@ -341,7 +254,7 @@ export default function DayColumn({
                             type="button"
                             onClick={() => setShowCopyMenu((prev) => !prev)}
                             title="Copiar rotina para outros dias"
-                            className={`p-2 rounded-lg cursor-pointer ${showCopyMenu ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
+                            className={`p-2 rounded-lg transition-colors cursor-pointer ${showCopyMenu ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                                 }`}
                         >
                             <Copy className="w-4 h-4" />
@@ -362,7 +275,7 @@ export default function DayColumn({
                                                 type="button"
                                                 disabled={isCurrent}
                                                 onClick={() => toggleCopyTarget(d.key)}
-                                                className={`py-1.5 text-xs font-mono rounded-lg cursor-pointer ${isCurrent
+                                                className={`py-1.5 text-xs font-mono rounded-lg transition-colors cursor-pointer ${isCurrent
                                                     ? 'opacity-30 cursor-not-allowed bg-zinc-950 text-zinc-600'
                                                     : isSelected
                                                         ? 'bg-[#d97757] text-white font-bold'
@@ -378,7 +291,7 @@ export default function DayColumn({
                                     type="button"
                                     onClick={handleConfirmCopy}
                                     disabled={selectedTargets.length === 0}
-                                    className="w-full py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 rounded-lg cursor-pointer flex items-center justify-center gap-1.5"
+                                    className="w-full py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                                 >
                                     <Check className="w-3.5 h-3.5" />
                                     Aplicar
@@ -391,7 +304,7 @@ export default function DayColumn({
                         type="button"
                         onClick={() => onAddClick && onAddClick(dayKey)}
                         title="Adicionar atividade"
-                        className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 rounded-lg cursor-pointer"
+                        className="p-2 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 rounded-lg transition-colors cursor-pointer"
                     >
                         <Plus className="w-4 h-4" />
                     </button>
@@ -404,7 +317,7 @@ export default function DayColumn({
                     <button
                         type="button"
                         onClick={() => onAddClick && onAddClick(dayKey)}
-                        className="flex-1 min-h-[140px] flex flex-col items-center justify-center border border-dashed border-zinc-800 hover:border-zinc-700 rounded-xl cursor-pointer print:hidden group"
+                        className="flex-1 min-h-[140px] flex flex-col items-center justify-center border border-dashed border-zinc-800 hover:border-zinc-700 rounded-xl transition-colors cursor-pointer print:hidden group"
                     >
                         <span className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300">
                             + Adicionar atividade
@@ -419,19 +332,18 @@ export default function DayColumn({
                         const isBeingDragged = draggedCardIndex === index;
                         const isTargetCard = dropPosition?.index === index && !isBeingDragged;
 
-                        // Borda indicativa no card que vai receber o item
-                        const borderIndicator = isTargetCard
+                        const translateClass = isTargetCard
                             ? dropPosition.place === 'before'
-                                ? 'border-t-2 !border-t-[#d97757]'
-                                : 'border-b-2 !border-b-[#d97757]'
-                            : '';
+                                ? 'translate-y-2 border-zinc-700 shadow-md'
+                                : '-translate-y-2 border-zinc-700 shadow-md'
+                            : 'translate-y-0';
 
                         if (isEditing) {
                             return (
                                 <div
                                     key={block.id}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="p-3 rounded-xl border border-zinc-700 space-y-2.5 print:hidden bg-zinc-950 shadow-lg"
+                                    className="p-3 sm:p-3 rounded-xl border border-zinc-700 space-y-2.5 print:hidden bg-zinc-950 shadow-lg"
                                 >
                                     <div className="flex items-center justify-between gap-2">
                                         <input
@@ -445,7 +357,7 @@ export default function DayColumn({
                                             type="button"
                                             onClick={() => onDeleteBlock && onDeleteBlock(dayKey, block.id)}
                                             title="Excluir"
-                                            className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl cursor-pointer shrink-0"
+                                            className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer shrink-0"
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -454,7 +366,8 @@ export default function DayColumn({
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <input
-                                                type="tel"
+                                                type="text"
+                                                inputMode="numeric"
                                                 maxLength={5}
                                                 value={editForm.start}
                                                 onChange={(e) => {
@@ -469,7 +382,8 @@ export default function DayColumn({
 
                                         <div>
                                             <input
-                                                type="tel"
+                                                type="text"
+                                                inputMode="numeric"
                                                 maxLength={5}
                                                 value={editForm.end}
                                                 onChange={(e) => {
@@ -486,7 +400,7 @@ export default function DayColumn({
                                     <button
                                         type="button"
                                         onClick={() => handleSaveEdit(block.id)}
-                                        className="w-full py-1.5 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 cursor-pointer"
+                                        className="w-full py-1.5 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 transition-colors cursor-pointer"
                                     >
                                         <Check className="w-3.5 h-3.5" />
                                         Concluir
@@ -507,19 +421,14 @@ export default function DayColumn({
                                     setDraggedCardIndex(null);
                                     setDropPosition(null);
                                 }}
-                                onTouchStart={(e) => handleTouchStart(e, index)}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={handleTouchEnd}
                                 onClick={() => handleStartEdit(block)}
-                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 select-none print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${borderIndicator} ${isBeingDragged
-                                    ? 'opacity-30 border-dashed border-[#d97757]'
-                                    : 'hover:bg-zinc-900 hover:border-zinc-700'
+                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-pointer select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
                                     }`}
                             >
-                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
                                     <IconComp
                                         strokeWidth={1.8}
-                                        className={`w-6 h-6 opacity-45 group-hover:opacity-75 print:w-3.5 print:h-3.5 print:opacity-40 ${theme.icon || 'text-zinc-400'}`}
+                                        className={`w-6 h-6 opacity-45 group-hover:opacity-75 transition-opacity print:w-3.5 print:h-3.5 print:opacity-40 ${theme.icon || 'text-zinc-400'}`}
                                     />
                                 </div>
 

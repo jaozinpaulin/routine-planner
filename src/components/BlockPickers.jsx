@@ -163,7 +163,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                             draggable
                             onDragStart={(e) => startDrag(e, item)}
                             onClick={() => handleCardClick(item)}
-                            className={`group relative p-2.5 sm:p-3 flex items-center justify-between overflow-hidden rounded-xl border transition-colors cursor-pointer select-none ${theme.bg}${theme.border}`}
+                            className={`group relative p-2.5 sm:p-3 flex items-center justify-between overflow-hidden rounded-xl border transition-all cursor-pointer active:scale-98 select-none ${theme.bg} ${theme.border}`}
                         >
                             <div className="flex items-center gap-2.5 min-w-0">
                                 <IconComp
@@ -174,19 +174,19 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                     {item.title}
                                 </span>
                             </div>
-                            <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 shrink-0 ml-1" />
+
+                            <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-colors shrink-0 ml-1" />
                         </div>
                     );
                 })}
             </div>
 
-            {/* Modal com posição fixa no terço superior para evitar trepidação com o teclado virtual */}
+            {/* Modal com posição fixa estática para evitar trepidação com teclado */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xs flex justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
                     <div
                         ref={modalRef}
-                        onClick={(e) => e.stopPropagation()}
-                        className="fixed top-[12%] sm:top-1/2 sm:-translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-[#141416] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-4"
+                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 transform-gpu"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
@@ -205,13 +205,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                             <button
                                 type="button"
                                 onClick={() => setEditingItem(null)}
-                                className="p-1.5 text-zinc-400 hover:text-zinc-200 rounded-lg cursor-pointer"
+                                className="p-1.5 text-zinc-400 hover:text-zinc-200 rounded-lg transition-colors cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleConfirm} className="space-y-4">
+                        <form onSubmit={handleConfirm} className="space-y-3.5">
                             <div>
                                 <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                                     Nome da Atividade
@@ -221,22 +221,23 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                     required
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 outline-none"
+                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2 text-sm text-zinc-100 outline-none transition-colors"
                                     placeholder="Ex: Treino, Estudo..."
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2.5">
                                 <div>
                                     <label className="block text-[11px] font-medium text-zinc-400 mb-1 text-center">
                                         Início
                                     </label>
                                     <input
-                                        type="tel"
+                                        type="text"
+                                        inputMode="numeric"
                                         maxLength={5}
                                         value={start}
                                         onChange={(e) => setStart(maskTimeInput(e.target.value))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="00:00"
                                     />
                                 </div>
@@ -245,11 +246,12 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         Fim
                                     </label>
                                     <input
-                                        type="tel"
+                                        type="text"
+                                        inputMode="numeric"
                                         maxLength={5}
                                         value={end}
                                         onChange={(e) => setEnd(maskTimeInput(e.target.value))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="00:00"
                                     />
                                 </div>
@@ -259,13 +261,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                 <button
                                     type="button"
                                     onClick={() => setEditingItem(null)}
-                                    className="flex-1 py-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl cursor-pointer"
+                                    className="flex-1 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-2.5 bg-[#d97757] hover:bg-[#c66a4c] text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                                    className="flex-1 py-2 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                                 >
                                     <Check className="w-4 h-4" />
                                     Adicionar
