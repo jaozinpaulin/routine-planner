@@ -9,8 +9,8 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     const [title, setTitle] = useState('');
     const [icon, setIcon] = useState('BookOpen');
     const [color, setColor] = useState('orange');
-    const [start, setStart] = useState('00:00');
-    const [end, setEnd] = useState('00:00');
+    const [start, setStart] = useState('');
+    const [end, setEnd] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -38,11 +38,11 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     return (
         <div
             onClick={onClose}
-            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full sm:max-w-md bg-[#121214] border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 max-h-[92dvh] overflow-y-auto my-auto"
+                className="w-full sm:max-w-md bg-[#121214] border-t sm:border border-zinc-800 rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 max-h-[85dvh] sm:max-h-[90vh] overflow-y-auto"
             >
                 <div className="flex items-center justify-between pb-2 border-b border-zinc-800 shrink-0">
                     <div>
@@ -62,7 +62,6 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     </button>
                 </div>
 
-                {/* Card de Preview */}
                 <div className="relative min-h-[54px] p-2.5 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 shrink-0">
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         <PreviewIcon
@@ -77,7 +76,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                         </span>
                     </div>
                     <span className="relative z-10 text-xs font-semibold pr-10 truncate text-zinc-100">
-                        {title.trim() || 'Nome da atividade'}
+                        {title.trim() || '-'}
                     </span>
                 </div>
 
@@ -158,9 +157,10 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                                     key={key}
                                     type="button"
                                     onClick={() => setColor(key)}
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform cursor-pointer ${val.dot} ${color === key
-                                        ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-zinc-950'
-                                        : 'opacity-50 hover:opacity-100 hover:scale-105'
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform cursor-pointer ${val.dot
+                                        } ${color === key
+                                            ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-zinc-950'
+                                            : 'opacity-50 hover:opacity-100 hover:scale-105'
                                         }`}
                                 >
                                     {color === key && <Check className="w-3 h-3 text-zinc-950 stroke-[3]" />}

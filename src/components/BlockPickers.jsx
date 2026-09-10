@@ -157,12 +157,14 @@ export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay,
 
             {editingItem && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs overflow-y-auto"
-                    onFocus={(e) => e.stopPropagation()}
+                    className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs overflow-y-auto"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setEditingItem(null);
+                    }}
                 >
                     <div ref={modalRef}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 my-auto transform-gpu max-h-[90vh] overflow-y-auto"
+                        className="w-full max-w-sm bg-[#121214] border-t sm:border border-zinc-800 rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[85vh] sm:max-h-[90vh] overflow-y-auto pb-safe"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
