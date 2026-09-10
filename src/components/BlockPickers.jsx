@@ -181,12 +181,12 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
-            {/* Modal com ajuste dinâmico para teclado virtual */}
+            {/* Modal centralizado sem encostar no fundo para não cortar com teclado */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
                     <div
                         ref={modalRef}
-                        className="w-full sm:max-w-sm bg-[#121214] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90dvh] overflow-y-auto pb-8 sm:pb-5"
+                        className="w-full sm:max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90dvh] overflow-y-auto my-auto"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">

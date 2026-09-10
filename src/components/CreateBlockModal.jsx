@@ -38,13 +38,13 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     return (
         <div
             onClick={onClose}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full sm:max-w-md bg-[#121214] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto pb-8 sm:pb-6"
+                className="w-full sm:max-w-md bg-[#121214] border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 max-h-[92dvh] overflow-y-auto my-auto"
             >
-                <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800 shrink-0">
+                <div className="flex items-center justify-between pb-2 border-b border-zinc-800 shrink-0">
                     <div>
                         <span className="text-[10px] font-semibold text-[#d97757] uppercase tracking-wider block">
                             Nova Atividade
@@ -63,11 +63,11 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                 </div>
 
                 {/* Card de Preview */}
-                <div className="relative min-h-[58px] p-2.5 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 shrink-0">
+                <div className="relative min-h-[54px] p-2.5 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 shrink-0">
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         <PreviewIcon
                             strokeWidth={1.75}
-                            className={`w-7 h-7 ${previewTheme.icon}`}
+                            className={`w-6 h-6 ${previewTheme.icon}`}
                         />
                     </div>
                     <div className="flex items-center gap-1.5 relative z-10">
@@ -81,7 +81,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     </span>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-3 pt-1">
+                <form onSubmit={handleSubmit} className="space-y-3 pt-0.5">
                     <div>
                         <label className="block text-xs font-medium text-zinc-300 mb-1">
                             Nome da atividade
@@ -92,7 +92,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                             placeholder="Ex: Treino, Faculdade, Leitura..."
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 outline-none transition-colors"
+                            className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2 text-sm text-zinc-100 outline-none transition-colors"
                         />
                     </div>
 
@@ -175,13 +175,13 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                            className="px-4 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
-                            className="px-5 py-2.5 bg-[#d97757] hover:bg-[#c66a4c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-98 cursor-pointer flex items-center gap-1.5"
+                            className="px-5 py-2 bg-[#d97757] hover:bg-[#c66a4c] text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-98 cursor-pointer flex items-center gap-1.5"
                         >
                             <Check className="w-4 h-4" />
                             Salvar Atividade

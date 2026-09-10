@@ -36,6 +36,10 @@ export default function DayColumn({
     const [dropPosition, setDropPosition] = useState(null); // { index: number, place: 'before' | 'after' }
     const copyMenuRef = useRef(null);
 
+    // Referência para toque no mobile
+    const touchStartIndexRef = useRef(null);
+    const touchCurrentTargetRef = useRef(null);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (copyMenuRef.current && !copyMenuRef.current.contains(e.target)) {
@@ -48,6 +52,7 @@ export default function DayColumn({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showCopyMenu]);
 
+    // Drag & drop padrão (Desktop)
     const handleDragOver = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -106,7 +111,6 @@ export default function DayColumn({
         e.dataTransfer.effectAllowed = 'move';
     };
 
-    // Detecta se o cursor está na metade superior ou inferior do card
     const handleCardDragOver = (e, index) => {
         e.preventDefault();
         e.stopPropagation();
@@ -158,6 +162,52 @@ export default function DayColumn({
     };
 
     const handleCardDragEnd = () => {
+        setDraggedCardIndex(null);
+        setDropPosition(null);
+    };
+
+    // Suporte a Touch para Mobile (Reordenação)
+    const handleTouchStart = (e, index) => {
+        touchStartIndexRef.current = index;
+        setDraggedCardIndex(index);
+    };
+
+    const handleTouchMove = (e) => {
+        if (touchStartIndexRef.current === null) return;
+        const touch = e.touches[0];
+        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardElement = targetElement ? targetElement.closest('[data-card-index]') : null;
+
+        if (cardElement) {
+            const targetIdx = Number(cardElement.getAttribute('data-card-index'));
+            touchCurrentTargetRef.current = targetIdx;
+            const rect = cardElement.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            const place = touch.clientY < midY ? 'before' : 'after';
+            setDropPosition({ index: targetIdx, place });
+        }
+    };
+
+    const handleTouchEnd = () => {
+        const fromIndex = touchStartIndexRef.current;
+        const targetIndex = touchCurrentTargetRef.current;
+
+        if (fromIndex !== null && targetIndex !== null && fromIndex !== targetIndex) {
+            const place = dropPosition?.place || 'after';
+            let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
+            if (fromIndex < insertIndex) insertIndex -= 1;
+
+            const updated = [...blocks];
+            const [movedCard] = updated.splice(fromIndex, 1);
+            updated.splice(insertIndex, 0, movedCard);
+
+            if (onReorderBlocks) {
+                onReorderBlocks(dayKey, updated);
+            }
+        }
+
+        touchStartIndexRef.current = null;
+        touchCurrentTargetRef.current = null;
         setDraggedCardIndex(null);
         setDropPosition(null);
     };
@@ -337,7 +387,6 @@ export default function DayColumn({
                         const isBeingDragged = draggedCardIndex === index;
                         const isTargetCard = dropPosition?.index === index && !isBeingDragged;
 
-                        // Deslocamento contextual dependendo de onde o cursor está sobre o card
                         const translateClass = isTargetCard
                             ? dropPosition.place === 'before'
                                 ? 'translate-y-2 border-zinc-700'
@@ -427,11 +476,15 @@ export default function DayColumn({
                         return (
                             <div
                                 key={block.id}
+                                data-card-index={index}
                                 draggable
                                 onDragStart={(e) => handleCardDragStart(e, index)}
                                 onDragOver={(e) => handleCardDragOver(e, index)}
                                 onDrop={(e) => handleCardDrop(e, index)}
                                 onDragEnd={handleCardDragEnd}
+                                onTouchStart={(e) => handleTouchStart(e, index)}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
                                 onClick={() => setEditingId(block.id)}
                                 className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
                                     }`}
