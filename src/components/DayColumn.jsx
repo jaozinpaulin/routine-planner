@@ -34,10 +34,14 @@ export default function DayColumn({
     const [showCopyMenu, setShowCopyMenu] = useState(false);
     const [selectedTargets, setSelectedTargets] = useState([]);
     const [draggedCardIndex, setDraggedCardIndex] = useState(null);
-    const [dropPosition, setDropPosition] = useState(null);
+    const [dropPosition, setDropPosition] = useState(null); // { index: number, place: 'before' | 'after' }
 
     const copyMenuRef = useRef(null);
-    const touchStartIndexRef = useRef(null);
+
+    // Guarda referências ativas para o Touch no mobile não perder o alvo
+    const touchStartIdxRef = useRef(null);
+    const lastTargetIdxRef = useRef(null);
+    const lastPlaceRef = useRef('after');
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -51,7 +55,6 @@ export default function DayColumn({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showCopyMenu]);
 
-    // Ao abrir edição, isola os valores para não dar pulos com re-render de estado global
     const handleStartEdit = (block) => {
         setEditingId(block.id);
         setEditForm({
@@ -70,6 +73,26 @@ export default function DayColumn({
             });
         }
         setEditingId(null);
+    };
+
+    // Reordena o array e avisa o App
+    const applyReorder = (fromIndex, toIndex, place) => {
+        if (fromIndex === null || toIndex === null || fromIndex === undefined || toIndex === undefined) return;
+
+        let targetIndex = place === 'before' ? toIndex : toIndex + 1;
+        if (fromIndex < targetIndex) {
+            targetIndex -= 1;
+        }
+
+        if (fromIndex !== targetIndex) {
+            const updated = [...blocks];
+            const [moved] = updated.splice(fromIndex, 1);
+            updated.splice(targetIndex, 0, moved);
+
+            if (onReorderBlocks) {
+                onReorderBlocks(dayKey, updated);
+            }
+        }
     };
 
     // Drag & Drop Desktop
@@ -155,19 +178,7 @@ export default function DayColumn({
 
         if (sourceIndexStr !== '' && sourceDay === dayKey) {
             const fromIndex = Number(sourceIndexStr);
-            const place = dropPosition?.place || 'after';
-
-            let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
-            if (fromIndex < insertIndex) insertIndex -= 1;
-
-            if (fromIndex !== insertIndex) {
-                const updated = [...blocks];
-                const [movedCard] = updated.splice(fromIndex, 1);
-                updated.splice(insertIndex, 0, movedCard);
-
-                if (onReorderBlocks) onReorderBlocks(dayKey, updated);
-            }
-
+            applyReorder(fromIndex, targetIndex, dropPosition?.place || 'after');
             setDraggedCardIndex(null);
             setDropPosition(null);
             return;
@@ -177,55 +188,43 @@ export default function DayColumn({
         handleDrop(e);
     };
 
-    // Touch nativo infalível para mobile
+    // Touch Mobile
     const handleTouchStart = (e, index) => {
-        touchStartIndexRef.current = index;
+        touchStartIdxRef.current = index;
+        lastTargetIdxRef.current = index;
+        lastPlaceRef.current = 'after';
         setDraggedCardIndex(index);
     };
 
     const handleTouchMove = (e) => {
-        if (touchStartIndexRef.current === null) return;
+        if (touchStartIdxRef.current === null) return;
         const touch = e.touches[0];
-        const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-        const cardElem = elem ? elem.closest('[data-card-index]') : null;
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cardEl = el ? el.closest('[data-card-index]') : null;
 
-        if (cardElem) {
-            const targetIdx = Number(cardElem.getAttribute('data-card-index'));
-            const rect = cardElem.getBoundingClientRect();
+        if (cardEl) {
+            const targetIdx = Number(cardEl.getAttribute('data-card-index'));
+            const rect = cardEl.getBoundingClientRect();
             const midY = rect.top + rect.height / 2;
             const place = touch.clientY < midY ? 'before' : 'after';
+
+            lastTargetIdxRef.current = targetIdx;
+            lastPlaceRef.current = place;
             setDropPosition({ index: targetIdx, place });
         }
     };
 
-    const handleTouchEnd = (e) => {
-        const fromIndex = touchStartIndexRef.current;
-        const touch = e.changedTouches ? e.changedTouches[0] : null;
+    const handleTouchEnd = () => {
+        const fromIdx = touchStartIdxRef.current;
+        const toIdx = lastTargetIdxRef.current;
+        const place = lastPlaceRef.current;
 
-        if (fromIndex !== null && touch) {
-            const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-            const cardElem = elem ? elem.closest('[data-card-index]') : null;
-
-            if (cardElem) {
-                const targetIndex = Number(cardElem.getAttribute('data-card-index'));
-                if (fromIndex !== targetIndex) {
-                    const rect = cardElem.getBoundingClientRect();
-                    const midY = rect.top + rect.height / 2;
-                    const place = touch.clientY < midY ? 'before' : 'after';
-
-                    let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
-                    if (fromIndex < insertIndex) insertIndex -= 1;
-
-                    const updated = [...blocks];
-                    const [movedCard] = updated.splice(fromIndex, 1);
-                    updated.splice(insertIndex, 0, movedCard);
-
-                    if (onReorderBlocks) onReorderBlocks(dayKey, updated);
-                }
-            }
+        if (fromIdx !== null && toIdx !== null) {
+            applyReorder(fromIdx, toIdx, place);
         }
 
-        touchStartIndexRef.current = null;
+        touchStartIdxRef.current = null;
+        lastTargetIdxRef.current = null;
         setDraggedCardIndex(null);
         setDropPosition(null);
     };
@@ -405,8 +404,8 @@ export default function DayColumn({
 
                         const translateClass = isTargetCard
                             ? dropPosition.place === 'before'
-                                ? 'translate-y-2 border-zinc-700'
-                                : '-translate-y-2 border-zinc-700'
+                                ? 'translate-y-2 border-zinc-700 shadow-md'
+                                : '-translate-y-2 border-zinc-700 shadow-md'
                             : 'translate-y-0';
 
                         if (isEditing) {
@@ -433,7 +432,6 @@ export default function DayColumn({
                                         </button>
                                     </div>
 
-                                    {/* Inputs com estado local: sem "piques" ao alternar foco */}
                                     <div className="grid grid-cols-2 gap-2">
                                         <div className="flex flex-col">
                                             <input

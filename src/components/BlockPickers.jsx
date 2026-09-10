@@ -181,12 +181,12 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
-            {/* Modal centralizado sem encostar no fundo para não cortar com teclado */}
+            {/* Modal com posição fixa estática para evitar trepidação com teclado */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs">
                     <div
                         ref={modalRef}
-                        className="w-full sm:max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90dvh] overflow-y-auto my-auto"
+                        className="w-full max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-3.5 transform-gpu"
                     >
                         <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
@@ -221,7 +221,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                     required
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2.5 text-sm text-zinc-100 outline-none transition-colors"
+                                    className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl px-3.5 py-2 text-sm text-zinc-100 outline-none transition-colors"
                                     placeholder="Ex: Treino, Estudo..."
                                 />
                             </div>
@@ -237,8 +237,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         maxLength={5}
                                         value={start}
                                         onChange={(e) => setStart(maskTimeInput(e.target.value))}
-                                        onBlur={(e) => setStart(normalizeTime(e.target.value, '00:00'))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="00:00"
                                     />
                                 </div>
@@ -252,8 +251,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                         maxLength={5}
                                         value={end}
                                         onChange={(e) => setEnd(maskTimeInput(e.target.value))}
-                                        onBlur={(e) => setEnd(normalizeTime(e.target.value, '00:00'))}
-                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2.5 text-base font-mono text-center text-zinc-100 outline-none"
+                                        className="w-full bg-zinc-950 border border-zinc-800 focus:border-[#d97757] rounded-xl py-2 text-base font-mono text-center text-zinc-100 outline-none"
                                         placeholder="00:00"
                                     />
                                 </div>
@@ -263,13 +261,13 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                                 <button
                                     type="button"
                                     onClick={() => setEditingItem(null)}
-                                    className="flex-1 py-2.5 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"
+                                    className="flex-1 py-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 rounded-xl transition-colors cursor-pointer"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-2.5 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                                    className="flex-1 py-2 bg-[#d97757] hover:bg-[#c66a4c] active:scale-98 text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm"
                                 >
                                     <Check className="w-4 h-4" />
                                     Adicionar
