@@ -199,7 +199,6 @@ export default function App() {
           daysCount={daysCount}
         />
 
-        {/* Abas no Mobile */}
         <div className="flex items-center gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800/60 rounded-xl lg:hidden overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-thumb]:bg-zinc-800 [&::-webkit-scrollbar-thumb]:rounded-full">
           {activeDays.map((d) => {
             const isCurrent = d.key === mobileActiveDay;
@@ -212,18 +211,13 @@ export default function App() {
                 type="button"
                 onClick={() => setMobileActiveDay(d.key)}
                 className={`flex-1 min-w-[48px] py-1.5 px-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-all ${isCurrent
-                  ? 'bg-[#d97757] text-white shadow-xs'
+                  ? 'bg-[#d97757] text-white shadow-xs font-semibold'
                   : isTarget
-                    ? 'border border-[#d97757]/60 text-zinc-200 bg-zinc-900'
+                    ? ' text-[#d97757] bg-zinc-900/90 font-bold'
                     : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
                   }`}
               >
                 <span>{d.short}</span>
-                {count > 0 && (
-                  <span className={`text-[10px] font-mono leading-none ${isCurrent ? 'text-white/90 font-bold' : 'text-zinc-500'}`}>
-                    •{count}
-                  </span>
-                )}
               </button>
             );
           })}

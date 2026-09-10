@@ -92,9 +92,8 @@ export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay,
 
     return (
         <section className="bg-zinc-900/40 border border-zinc-800/60 p-3 sm:p-4 rounded-2xl mb-4 sm:mb-6 print:hidden relative space-y-3">
-            {/* Seletor de dias ativo no topo */}
             {onSelectDay && (
-                <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2 border-b border-zinc-800/60 scrollbar-none">
+                <div className="hidden lg:flex items-center justify-between gap-2 overflow-x-auto pb-2 border-b border-zinc-800/60 scrollbar-none">
                     <span className="text-xs font-medium text-zinc-400 shrink-0">
                         Dia selecionado para adição:
                     </span>
@@ -123,12 +122,11 @@ export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay,
                 <span className="text-xs font-semibold text-zinc-300">
                     Blocos rápidos (Toque para adicionar)
                 </span>
-                <span className="text-xs text-zinc-400">
+                <span className="hidden lg:block text-xs text-zinc-400">
                     Alvo: <strong className="text-[#d97757]">{activeDayLabel || 'Selecionado'}</strong>
                 </span>
             </div>
 
-            {/* Grade de blocos rápidos (Apenas cliques limpos, sem drag and drop conflitante) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
                 {INITIAL_ITEMS.map((item) => {
                     const IconComp = ICONS[item.icon] || ICONS.Sparkles;
