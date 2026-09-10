@@ -30,7 +30,6 @@ const INITIAL_SCHEDULE = {
 };
 
 export default function App() {
-  // Carrega contagem de dias com fallback padrão em 5
   const [daysCount, setDaysCount] = useState(() => {
     const saved = localStorage.getItem('routine_days_count');
     return saved ? Number(saved) : 5;
@@ -42,7 +41,6 @@ export default function App() {
     return localStorage.getItem('routine_targeted_day') || null;
   });
 
-  // Carrega dados salvos no localStorage
   const [schedule, setSchedule] = useState(() => {
     const saved = localStorage.getItem('routine_schedule_data');
     if (saved) {
@@ -63,17 +61,14 @@ export default function App() {
 
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false);
 
-  // Salva no localStorage a cada alteração da rotina
   useEffect(() => {
     localStorage.setItem('routine_schedule_data', JSON.stringify(schedule));
   }, [schedule]);
 
-  // Salva a contagem de dias
   useEffect(() => {
     localStorage.setItem('routine_days_count', String(daysCount));
   }, [daysCount]);
 
-  // Salva o dia marcado como alvo
   useEffect(() => {
     if (targetedDay) {
       localStorage.setItem('routine_targeted_day', targetedDay);
@@ -99,6 +94,13 @@ export default function App() {
     setSchedule((prev) => ({
       ...prev,
       [dayKey]: [...prev[dayKey], newBlock],
+    }));
+  };
+
+  const handleReorderBlocks = (dayKey, reorderedBlocks) => {
+    setSchedule((prev) => ({
+      ...prev,
+      [dayKey]: reorderedBlocks,
     }));
   };
 
@@ -176,7 +178,7 @@ export default function App() {
   const currentDayInfo = activeDays.find((d) => d.key === mobileActiveDay) || activeDays[0];
 
   return (
-    <div className="min-h-screen bg-[#141416] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 antialiased">
+    <div className="min-h-screen bg-[#0d0d0e] text-zinc-100 flex flex-col justify-between p-3 sm:p-5 lg:p-6 antialiased">
       <div className="w-full space-y-3 sm:space-y-5">
         <Header
           daysCount={daysCount}
@@ -245,6 +247,7 @@ export default function App() {
                   isTargeted={day.key === targetedDay}
                   onToggleTarget={handleToggleTarget}
                   onDropBlock={handleDropBlock}
+                  onReorderBlocks={handleReorderBlocks}
                   onAddClick={handleAddClick}
                   onUpdateBlock={handleUpdateBlock}
                   onDeleteBlock={handleDeleteBlock}
@@ -264,6 +267,7 @@ export default function App() {
         schedule={schedule}
         targetedDay={targetedDay}
       />
+
       <CreateBlockModal
         isOpen={modalState.isOpen}
         dayLabel={modalState.dayLabel}
@@ -271,7 +275,7 @@ export default function App() {
         onSave={handleSaveModalBlock}
       />
 
-      <footer className="pt-6 pb-2 text-center">
+      <footer className="pt-6 pb-4 sm:pb-2 text-center">
         <a
           href="https://github.com/jaozinpaulin"
           target="_blank"

@@ -21,6 +21,7 @@ export default function DayColumn({
     isTargeted = false,
     onToggleTarget,
     onDropBlock,
+    onReorderBlocks,
     onAddClick,
     onUpdateBlock,
     onDeleteBlock,
@@ -31,6 +32,8 @@ export default function DayColumn({
     const [editingId, setEditingId] = useState(null);
     const [showCopyMenu, setShowCopyMenu] = useState(false);
     const [selectedTargets, setSelectedTargets] = useState([]);
+    const [draggedCardIndex, setDraggedCardIndex] = useState(null);
+    const [dropPosition, setDropPosition] = useState(null); // { index: number, place: 'before' | 'after' }
     const copyMenuRef = useRef(null);
 
     useEffect(() => {
@@ -47,26 +50,116 @@ export default function DayColumn({
 
     const handleDragOver = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         e.dataTransfer.dropEffect = 'copy';
+        if (!isOver) setIsOver(true);
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         setIsOver(true);
     };
 
-    const handleDragLeave = () => {
-        setIsOver(false);
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsOver(false);
+            setDropPosition(null);
+        }
     };
 
     const handleDrop = (e) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsOver(false);
-        const data = e.dataTransfer.getData('application/json');
-        if (!data) return;
+        setDropPosition(null);
+
+        const internalIndex = e.dataTransfer.getData('text/card-index');
+        const sourceDay = e.dataTransfer.getData('text/day-key');
+
+        if (internalIndex !== '' && sourceDay === dayKey) {
+            setDraggedCardIndex(null);
+            return;
+        }
+
+        const rawData = e.dataTransfer.getData('application/json');
+        if (!rawData) return;
 
         try {
-            const item = JSON.parse(data);
-            if (onDropBlock) onDropBlock(dayKey, item);
+            const parsed = JSON.parse(rawData);
+            const blockItem = parsed.item || parsed;
+            if (onDropBlock) {
+                onDropBlock(dayKey, blockItem);
+            }
         } catch (err) {
-            console.error('Erro drop:', err);
+            console.error('Erro no drop da coluna:', err);
         }
+    };
+
+    const handleCardDragStart = (e, index) => {
+        e.stopPropagation();
+        setDraggedCardIndex(index);
+        e.dataTransfer.setData('text/card-index', String(index));
+        e.dataTransfer.setData('text/day-key', dayKey);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    // Detecta se o cursor está na metade superior ou inferior do card
+    const handleCardDragOver = (e, index) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const place = e.clientY < midY ? 'before' : 'after';
+
+        if (!dropPosition || dropPosition.index !== index || dropPosition.place !== place) {
+            setDropPosition({ index, place });
+        }
+    };
+
+    const handleCardDrop = (e, targetIndex) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOver(false);
+
+        const sourceIndexStr = e.dataTransfer.getData('text/card-index');
+        const sourceDay = e.dataTransfer.getData('text/day-key');
+
+        if (sourceIndexStr !== '' && sourceDay === dayKey) {
+            const fromIndex = Number(sourceIndexStr);
+            const place = dropPosition?.place || 'after';
+
+            let insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
+            if (fromIndex < insertIndex) {
+                insertIndex -= 1;
+            }
+
+            if (fromIndex !== insertIndex) {
+                const updated = [...blocks];
+                const [movedCard] = updated.splice(fromIndex, 1);
+                updated.splice(insertIndex, 0, movedCard);
+
+                if (onReorderBlocks) {
+                    onReorderBlocks(dayKey, updated);
+                }
+            }
+
+            setDraggedCardIndex(null);
+            setDropPosition(null);
+            return;
+        }
+
+        setDropPosition(null);
+        handleDrop(e);
+    };
+
+    const handleCardDragEnd = () => {
+        setDraggedCardIndex(null);
+        setDropPosition(null);
     };
 
     const toggleCopyTarget = (targetKey) => {
@@ -95,22 +188,27 @@ export default function DayColumn({
     return (
         <div
             onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-all overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
-                ? 'bg-zinc-900/70 border-[#d97757]/60'
+            className={`relative flex flex-col rounded-2xl border min-h-[440px] transition-colors duration-150 overflow-visible print:min-h-0 print:rounded-lg print:border-zinc-300 print:bg-[#fcfcfc] print:break-inside-avoid ${isOver
+                ? 'border-zinc-700/80 bg-zinc-800/25'
                 : isTargeted
                     ? 'border-[#d97757]/50 bg-zinc-900/40 ring-1 ring-[#d97757]/20 shadow-sm'
                     : isWeekend
                         ? 'bg-[#151518] border-zinc-800/70'
                         : 'bg-zinc-900/40 border-zinc-800/70'
-                }`}>
+                }`}
+        >
+            {/* Header da coluna */}
             <div
-                className={`px-4 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isTargeted
-                    ? 'border-[#d97757]/30 bg-zinc-900/60'
-                    : isWeekend
-                        ? 'border-zinc-800/70 bg-zinc-900/50'
-                        : 'border-zinc-800/70 bg-zinc-950/40'
+                className={`px-4 py-3 border-b flex items-center justify-between rounded-t-2xl print:px-2 print:py-1.5 print:border-zinc-300 print:bg-zinc-100 ${isOver
+                    ? 'border-zinc-700/70 bg-zinc-850/40'
+                    : isTargeted
+                        ? 'border-[#d97757]/30 bg-zinc-900/60'
+                        : isWeekend
+                            ? 'border-zinc-800/70 bg-zinc-900/50'
+                            : 'border-zinc-800/70 bg-zinc-950/40'
                     }`}
             >
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -142,7 +240,6 @@ export default function DayColumn({
                 </div>
 
                 <div className="flex items-center gap-1 print:hidden relative">
-                    {/* Botão de Fixar/Destacar com Pushpin */}
                     <button
                         type="button"
                         onClick={() => onToggleTarget && onToggleTarget(dayKey)}
@@ -232,10 +329,20 @@ export default function DayColumn({
                         </span>
                     </button>
                 ) : (
-                    blocks.map((block) => {
+                    blocks.map((block, index) => {
                         const IconComp = (ICONS && ICONS[block.icon]) ? ICONS[block.icon] : (ICONS?.Sparkles || 'span');
                         const theme = (COLORS && COLORS[block.color]) ? COLORS[block.color] : (COLORS?.orange || {});
                         const isEditing = editingId === block.id;
+
+                        const isBeingDragged = draggedCardIndex === index;
+                        const isTargetCard = dropPosition?.index === index && !isBeingDragged;
+
+                        // Deslocamento contextual dependendo de onde o cursor está sobre o card
+                        const translateClass = isTargetCard
+                            ? dropPosition.place === 'before'
+                                ? 'translate-y-2 border-zinc-700'
+                                : '-translate-y-2 border-zinc-700'
+                            : 'translate-y-0';
 
                         if (isEditing) {
                             return (
@@ -320,8 +427,14 @@ export default function DayColumn({
                         return (
                             <div
                                 key={block.id}
+                                draggable
+                                onDragStart={(e) => handleCardDragStart(e, index)}
+                                onDragOver={(e) => handleCardDragOver(e, index)}
+                                onDrop={(e) => handleCardDrop(e, index)}
+                                onDragEnd={handleCardDragEnd}
                                 onClick={() => setEditingId(block.id)}
-                                className="group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all cursor-pointer select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid"
+                                className={`group relative min-h-[62px] p-2.5 sm:p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800/80 bg-zinc-900/60 hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-150 ease-out cursor-grab active:cursor-grabbing select-none active:scale-[0.99] print:min-h-0 print:py-1 print:px-1.5 print:rounded-md print:border-zinc-300 print:bg-white print:break-inside-avoid ${translateClass} ${isBeingDragged ? 'opacity-25 scale-95 border-dashed border-zinc-700' : ''
+                                    }`}
                             >
                                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-hover:scale-105">
                                     <IconComp
@@ -330,14 +443,14 @@ export default function DayColumn({
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-1.5 relative z-10">
+                                <div className="flex items-center gap-1.5 relative z-10 pointer-events-none">
                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${theme.dot || 'bg-zinc-400'} print:hidden`} />
                                     <span className="text-[11px] sm:text-[10px] font-mono text-zinc-400 print:text-[7.5px] print:leading-none print:font-semibold print:text-zinc-500">
                                         {block.start} - {block.end}
                                     </span>
                                 </div>
 
-                                <span className="relative z-10 text-xs font-medium leading-snug pr-7 line-clamp-2 text-zinc-100 print:text-[8.5px] print:leading-tight print:pr-4 print:text-zinc-900 print:line-clamp-1">
+                                <span className="relative z-10 text-xs font-medium leading-snug pr-7 line-clamp-2 text-zinc-100 print:text-[8.5px] print:leading-tight print:pr-4 print:text-zinc-900 print:line-clamp-1 pointer-events-none">
                                     {block.title}
                                 </span>
                             </div>

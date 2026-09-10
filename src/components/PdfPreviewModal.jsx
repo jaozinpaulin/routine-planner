@@ -177,6 +177,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                         </div>
                                     </div>
 
+                                    {/* Grade ajustada: items-start sem min-height fixo para não sobrar espaço vazio abaixo */}
                                     <div className={`grid gap-2.5 items-start ${is7Days ? 'grid-cols-7' : 'grid-cols-5'}`}>
                                         {activeDays.map((day) => {
                                             const blocks = schedule[day.key] || [];
@@ -186,8 +187,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                             return (
                                                 <div
                                                     key={day.key}
-                                                    className={`rounded-xl border flex flex-col overflow-hidden min-h-[440px] ${isTarget
-                                                        ? 'border-[#d97757]/50 bg-zinc-900/60 shadow-sm'
+                                                    className={`rounded-xl border flex flex-col overflow-hidden h-fit self-start ${isTarget
+                                                        ? 'border-[#d97757]/50 bg-zinc-900/60 shadow-sm ring-1 ring-[#d97757]/20'
                                                         : isWeekend
                                                             ? 'bg-[#161619] border-zinc-800/70'
                                                             : 'bg-zinc-900/50 border-zinc-800/90'
@@ -210,9 +211,9 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                         )}
                                                     </div>
 
-                                                    <div className="p-1.5 flex flex-col gap-1.5 flex-1">
+                                                    <div className="p-1.5 flex flex-col gap-1.5">
                                                         {blocks.length === 0 ? (
-                                                            <div className="py-8 flex items-center justify-center flex-1">
+                                                            <div className="py-4 flex items-center justify-center">
                                                                 <span className="text-[10px] text-zinc-600 font-mono">
                                                                     Sem atividades
                                                                 </span>

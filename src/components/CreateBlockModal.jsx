@@ -38,13 +38,13 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     return (
         <div
             onClick={onClose}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs print:hidden"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full sm:max-w-md bg-[#161618] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+                className="w-full sm:max-w-md bg-[#121214] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3.5 max-h-[92dvh] overflow-y-auto pb-8 sm:pb-6"
             >
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800 shrink-0">
                     <div>
                         <span className="text-[10px] font-semibold text-[#d97757] uppercase tracking-wider block">
                             Nova Atividade
@@ -63,11 +63,11 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                 </div>
 
                 {/* Card de Preview */}
-                <div className="relative min-h-[66px] p-3 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60">
+                <div className="relative min-h-[58px] p-2.5 flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60 shrink-0">
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         <PreviewIcon
                             strokeWidth={1.75}
-                            className={`w-8 h-8 ${previewTheme.icon}`}
+                            className={`w-7 h-7 ${previewTheme.icon}`}
                         />
                     </div>
                     <div className="flex items-center gap-1.5 relative z-10">
@@ -81,9 +81,9 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     </span>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-3.5 pt-1">
+                <form onSubmit={handleSubmit} className="space-y-3 pt-1">
                     <div>
-                        <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                        <label className="block text-xs font-medium text-zinc-300 mb-1">
                             Nome da atividade
                         </label>
                         <input
@@ -96,9 +96,9 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1.5 text-center">
+                            <label className="block text-xs font-medium text-zinc-300 mb-1 text-center">
                                 Início
                             </label>
                             <input
@@ -113,7 +113,7 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-zinc-300 mb-1.5 text-center">
+                            <label className="block text-xs font-medium text-zinc-300 mb-1 text-center">
                                 Fim
                             </label>
                             <input
@@ -130,16 +130,16 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                        <label className="block text-xs font-medium text-zinc-300 mb-1">
                             Ícone
                         </label>
-                        <div className="grid grid-cols-8 gap-1.5 p-2 bg-zinc-950 border border-zinc-800 rounded-xl max-h-24 overflow-y-auto scrollbar-none">
+                        <div className="grid grid-cols-8 gap-1.5 p-2 bg-zinc-950 border border-zinc-800 rounded-xl max-h-20 overflow-y-auto scrollbar-none">
                             {Object.entries(ICONS).map(([key, IconC]) => (
                                 <button
                                     key={key}
                                     type="button"
                                     onClick={() => setIcon(key)}
-                                    className={`p-2 rounded-lg flex items-center justify-center transition-all cursor-pointer ${icon === key
+                                    className={`p-1.5 rounded-lg flex items-center justify-center transition-all cursor-pointer ${icon === key
                                         ? 'bg-zinc-800 text-[#d97757] ring-1 ring-[#d97757]/60'
                                         : 'text-zinc-500 hover:text-zinc-200'
                                         }`}
@@ -151,27 +151,27 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
                     </div>
 
                     <div>
-                        <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                        <label className="block text-xs font-medium text-zinc-300 mb-1">
                             Cor
                         </label>
-                        <div className="flex items-center justify-between p-2.5 bg-zinc-950 border border-zinc-800 rounded-xl">
+                        <div className="flex items-center justify-between p-2 bg-zinc-950 border border-zinc-800 rounded-xl">
                             {Object.entries(COLORS).map(([key, val]) => (
                                 <button
                                     key={key}
                                     type="button"
                                     onClick={() => setColor(key)}
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform cursor-pointer ${val.dot} ${color === key
+                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform cursor-pointer ${val.dot} ${color === key
                                         ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-zinc-950'
                                         : 'opacity-50 hover:opacity-100 hover:scale-105'
                                         }`}
                                 >
-                                    {color === key && <Check className="w-3.5 h-3.5 text-zinc-950 stroke-[3]" />}
+                                    {color === key && <Check className="w-3 h-3 text-zinc-950 stroke-[3]" />}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-zinc-800">
+                    <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-zinc-800">
                         <button
                             type="button"
                             onClick={onClose}

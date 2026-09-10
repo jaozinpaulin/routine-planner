@@ -134,7 +134,7 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
 
     const startDrag = (e, item) => {
         const theme = COLORS[item.color] || COLORS.orange;
-        e.dataTransfer.setData('application/json', JSON.stringify({ ...item, start: '00:00', end: '00:00', theme }));
+        e.dataTransfer.setData('application/json', JSON.stringify({ type: 'picker-block', item: { ...item, start: '00:00', end: '00:00', theme } }));
         e.dataTransfer.effectAllowed = 'copy';
     };
 
@@ -181,13 +181,14 @@ export default function BlockPickers({ onSelectBlock, activeDayLabel }) {
                 })}
             </div>
 
+            {/* Modal com ajuste dinâmico para teclado virtual */}
             {editingItem && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xs">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs overflow-y-auto">
                     <div
                         ref={modalRef}
-                        className="w-full sm:max-w-sm bg-[#161618] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150"
+                        className="w-full sm:max-w-sm bg-[#121214] border border-zinc-800 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-3.5 max-h-[90dvh] overflow-y-auto pb-8 sm:pb-5"
                     >
-                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+                        <div className="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">
                                     {ActiveIcon && <ActiveIcon strokeWidth={1.8} className={`w-4 h-4 ${activeTheme.icon}`} />}
