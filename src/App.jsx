@@ -44,15 +44,15 @@ export default function App() {
     window.print();
   };
 
-  // Drop desktop
+  // Drop desktop tradicional (arrastar direto para a coluna)
   const handleDropBlock = (dayKey, item) => {
     const newBlock = {
       id: `${item.id}-${Date.now()}`,
       title: item.title,
       icon: item.icon,
       color: item.color,
-      start: '08:00',
-      end: '09:00',
+      start: item.start || '08:00',
+      end: item.end || '09:00',
     };
 
     setSchedule((prev) => ({
@@ -61,10 +61,10 @@ export default function App() {
     }));
   };
 
-  // Clique rápido (para celular ou desktop)
-  const handleQuickAdd = (item) => {
+  // Recebe o item configurado diretamente do card inline do BlockPickers
+  const handleQuickAdd = (configuredItem) => {
     const targetDay = mobileActiveDay;
-    handleDropBlock(targetDay, item);
+    handleDropBlock(targetDay, configuredItem);
   };
 
   const handleAddClick = (dayKey) => {
@@ -147,11 +147,11 @@ export default function App() {
 
         <BlockPickers
           onSelectBlock={handleQuickAdd}
-          activeDayLabel={currentDayInfo.short}
+          activeDayLabel={currentDayInfo.label}
         />
 
-        {/* Barra de abas exclusiva para Mobile */}
-        <div className="flex items-center gap-1.5 p-1 bg-zinc-900/60 border border-zinc-800/80 rounded-xl lg:hidden print:hidden overflow-x-auto">
+        {/* Abas no Mobile */}
+        <div className="flex items-center gap-1.5 p-1.5 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl lg:hidden print:hidden overflow-x-auto">
           {activeDays.map((d) => {
             const isCurrent = d.key === mobileActiveDay;
             const count = (schedule[d.key] || []).length;
@@ -160,14 +160,14 @@ export default function App() {
                 key={d.key}
                 type="button"
                 onClick={() => setMobileActiveDay(d.key)}
-                className={`flex-1 min-w-[50px] py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all ${isCurrent
-                  ? 'bg-[#d97757] text-white shadow-sm'
+                className={`flex-1 min-w-[52px] py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${isCurrent
+                  ? 'bg-[#d97757] text-white shadow-md'
                   : 'text-zinc-400 hover:text-zinc-200 bg-transparent'
                   }`}
               >
                 <span>{d.short}</span>
                 {count > 0 && (
-                  <span className={`text-[9px] px-1 rounded-full ${isCurrent ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${isCurrent ? 'bg-white/20 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
                     {count}
                   </span>
                 )}
