@@ -49,8 +49,8 @@ const DAYS_LIST = [
 export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay, activeDayLabel, daysCount = 5 }) {
     const [editingItem, setEditingItem] = useState(null);
     const [title, setTitle] = useState('');
-    const [start, setStart] = useState('00:00');
-    const [end, setEnd] = useState('00:00');
+    const [start, setStart] = useState('');
+    const [end, setEnd] = useState('');
     const modalRef = useRef(null);
 
     useEffect(() => {
@@ -68,8 +68,8 @@ export default function BlockPickers({ onSelectBlock, activeDayKey, onSelectDay,
     const handleCardClick = (item) => {
         setEditingItem(item);
         setTitle(item.title);
-        setStart('00:00');
-        setEnd('00:00');
+        setStart('');
+        setEnd('');
     };
 
     const handleConfirm = (e) => {
