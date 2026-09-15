@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { X, Download, Loader2, Sun, Moon } from 'lucide-react';
+import { X, Download, Loader2, Sun, Moon, Image as ImageIcon, Monitor } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import jsPDF from 'jspdf';
 import { ICONS, COLORS } from './BlockPickers';
@@ -10,6 +10,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
     const printRef = useRef(null);
     const containerRef = useRef(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isGeneratingImg, setIsGeneratingImg] = useState(false);
     const [scale, setScale] = useState(1);
     const [isLightMode, setIsLightMode] = useState(false);
 
@@ -79,46 +80,99 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
         }
     };
 
+    const handleDownloadImage = async () => {
+        if (!printRef.current || isGeneratingImg) return;
+        setIsGeneratingImg(true);
+
+        try {
+            const element = printRef.current;
+            const bgHex = isLightMode ? '#ffffff' : '#121214';
+
+            const dataUrl = await toPng(element, {
+                quality: 0.98,
+                pixelRatio: 2,
+                backgroundColor: bgHex,
+                cacheBust: true,
+            });
+
+            const downloadLink = document.createElement('a');
+            downloadLink.href = dataUrl;
+            downloadLink.download = isLightMode ? 'cronograma-semanal-l.png' : 'cronograma-semanal.png';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            onClose();
+        } catch (error) {
+            console.error('Erro ao gerar imagem:', error);
+        } finally {
+            setIsGeneratingImg(false);
+        }
+    };
+
     const is7Days = activeDays.length === 7;
 
     return (
         <div onClick={onClose}
-            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-black/85 backdrop-blur-sm">
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5 bg-black/85 backdrop-blur-sm">
             <div onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-5xl bg-[#161618] border border-zinc-800 rounded-2xl flex flex-col max-h-[94vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-center justify-between gap-3 px-3.5 sm:px-6 py-3 border-b border-zinc-800 bg-[#141416] shrink-0">
-                    <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                            <h3 className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">
-                                Visualização do PDF
-                            </h3>
-                            <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-[#d97757]/20 text-[#d97757] font-mono shrink-0">
-                                A4 Paisagem
-                            </span>
+                className="w-full max-w-5xl bg-[#161618] border border-zinc-800 rounded-2xl flex flex-col max-h-[96vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+
+                {/* Header Otimizado para Mobile */}
+                <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-zinc-800 bg-[#141416] shrink-0">
+                    <div className="min-w-0 flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hidden sm:block">
+                            <Monitor className="w-4 h-4 text-[#d97757]" />
                         </div>
-                        <p className="text-[11px] text-zinc-400 truncate hidden sm:block">
-                            Confira como o cronograma ficará diagramado no documento
-                        </p>
+                        <div>
+                            <div className="flex items-center gap-1.5">
+                                <h3 className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">
+                                    Visualização
+                                </h3>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 truncate hidden sm:block">
+                                Confira a diagramação antes de exportar
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                         <button
                             type="button"
                             onClick={() => setIsLightMode((prev) => !prev)}
                             title={isLightMode ? 'Mudar para Tema Escuro' : 'Mudar para Tema Claro'}
-                            className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl border transition-all cursor-pointer ${isLightMode
-                                ? 'bg-zinc-100 text-zinc-800 border-zinc-300 hover:bg-zinc-200 shadow-xs'
+                            className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-medium rounded-xl border transition-all cursor-pointer ${isLightMode
+                                ? 'bg-zinc-100 text-zinc-800 border-zinc-300 hover:bg-zinc-200'
                                 : 'bg-zinc-900 text-zinc-300 border-zinc-700/80 hover:bg-zinc-800 hover:text-zinc-100'
                                 }`}>
                             {isLightMode ? (
                                 <>
-                                    <Moon className="w-3.5 h-3.5 text-zinc-700" />
-                                    <span className="hidden sm:inline">Modo Escuro</span>
+                                    <Moon className="w-3.5 h-3.5 text-zinc-700 shrink-0" />
+                                    <span className="hidden md:inline">Modo Escuro</span>
                                 </>
                             ) : (
                                 <>
-                                    <Sun className="w-3.5 h-3.5 text-amber-400" />
-                                    <span className="hidden sm:inline">Modo Claro</span>
+                                    <Sun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                    <span className="hidden md:inline">Modo Claro</span>
+                                </>
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDownloadImage}
+                            disabled={isGeneratingImg}
+                            title="Baixar como Imagem PNG"
+                            className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-200 text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+                            {isGeneratingImg ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                                    <span className="hidden sm:inline">Gerando...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ImageIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <span>PNG</span>
                                 </>
                             )}
                         </button>
@@ -127,16 +181,17 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                             type="button"
                             onClick={handleDownloadPdf}
                             disabled={isGenerating}
-                            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#d97757] hover:bg-[#c66a4c] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
+                            title="Baixar como Documento PDF"
+                            className="inline-flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 bg-[#d97757] hover:bg-[#c66a4c] disabled:opacity-50 text-white text-xs font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap shrink-0">
                             {isGenerating ? (
                                 <>
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                    <span>Gerando...</span>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                                    <span className="hidden sm:inline">Gerando...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Download className="w-3.5 h-3.5" />
-                                    <span>Baixar PDF</span>
+                                    <Download className="w-3.5 h-3.5 shrink-0" />
+                                    <span>PDF</span>
                                 </>
                             )}
                         </button>
@@ -144,7 +199,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                         <button
                             type="button"
                             onClick={onClose}
-                            className="p-2 text-zinc-400 hover:text-zinc-200 rounded-xl hover:bg-zinc-800/60 transition-colors cursor-pointer shrink-0"
+                            className="p-1.5 sm:p-2 text-zinc-400 hover:text-zinc-200 rounded-xl hover:bg-zinc-800/60 transition-colors cursor-pointer shrink-0 ml-0.5"
                         >
                             <X className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
@@ -152,7 +207,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                 </div>
 
                 <div ref={containerRef}
-                    className="flex-1 overflow-auto p-3 sm:p-5 bg-zinc-950/80 flex items-start justify-center [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-800/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700">
+                    className="flex-1 overflow-auto p-2 sm:p-5 bg-zinc-950/80 flex items-start justify-center [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-800/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700">
                     <div
                         style={{
                             width: `${1060 * scale}px`,
@@ -193,7 +248,6 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                         </div>
                                     </div>
 
-                                    {/* Grade de colunas */}
                                     <div className={`grid gap-2.5 items-start ${is7Days ? 'grid-cols-7' : 'grid-cols-5'}`}>
                                         {activeDays.map((day) => {
                                             const blocks = schedule[day.key] || [];
@@ -228,10 +282,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                             {day.label}
                                                         </span>
                                                         {blocks.length > 0 && (
-                                                            <span className={`text-[9px] font-mono ${isLightMode
-                                                                ? 'text-zinc-700'
-                                                                : 'text-zinc-400'
-                                                                }`}>
+                                                            <span className={`text-[9px] font-mono ${isLightMode ? 'text-zinc-700' : 'text-zinc-400'}`}>
                                                                 {blocks.length}
                                                             </span>
                                                         )}
@@ -256,8 +307,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                                             ? 'bg-white border-zinc-200 shadow-2xs'
                                                                             : 'border-zinc-800 bg-zinc-900/90'
                                                                             }`}>
-                                                                        <div className={`absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none ${isLightMode ? 'opacity-90' : 'opacity-80'
-                                                                            }`}>
+                                                                        <div className={`absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none ${isLightMode ? 'opacity-90' : 'opacity-80'}`}>
                                                                             <IconComp strokeWidth={1.8} className={`w-4 h-4 ${theme.icon}`} />
                                                                         </div>
 
@@ -268,8 +318,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                                             </span>
                                                                         </div>
 
-                                                                        <span className={`text-[10px] font-medium leading-tight line-clamp-1 pr-5 relative z-10 mt-0.5 ${isLightMode ? 'text-zinc-900 font-bold' : 'text-zinc-200'
-                                                                            }`}>
+                                                                        <span className={`text-[10px] font-medium leading-tight line-clamp-1 pr-5 relative z-10 mt-0.5 ${isLightMode ? 'text-zinc-900 font-bold' : 'text-zinc-200'}`}>
                                                                             {block.title}
                                                                         </span>
                                                                     </div>
@@ -283,8 +332,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                     </div>
                                 </div>
 
-                                <div className={`pt-4 mt-4 border-t flex items-center justify-between text-[10px] shrink-0 ${isLightMode ? 'border-zinc-200 text-zinc-400' : 'border-zinc-800/80 text-zinc-500'
-                                    }`}>
+                                <div className={`pt-4 mt-4 border-t flex items-center justify-between text-[10px] shrink-0 ${isLightMode ? 'border-zinc-200 text-zinc-400' : 'border-zinc-800/80 text-zinc-500'}`}>
                                     <span>Routine Planner</span>
                                     <span>github.com/jaozinpaulin</span>
                                 </div>

@@ -41,7 +41,7 @@ export default function Header({ daysCount, onDaysCountChange, onPrint }) {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d97757] hover:bg-[#c66a4c] text-white text-xs font-medium rounded-lg transition-colors shadow-sm"
                 >
                     <Download className="w-3.5 h-3.5" />
-                    <span>PDF</span>
+                    <span>Exportar</span>
                 </button>
             </div>
         </header>
