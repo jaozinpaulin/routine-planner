@@ -20,20 +20,20 @@ export const COLORS = {
 };
 
 const INITIAL_ITEMS = [
-    { id: 'sono', title: 'Descanso / Sono', icon: 'Moon', color: 'violet' },
+    { id: 'sono', title: 'Sono / Descanso', icon: 'Moon', color: 'violet' },
+    { id: 'higiene', title: 'Higiene / Banho', icon: 'Sparkles', color: 'teal' },
     { id: 'refeicao', title: 'Almoço / Janta', icon: 'Utensils', color: 'amber' },
-    { id: 'trajeto', title: 'Trajeto / Ônibus', icon: 'Bus', color: 'emerald' },
-    { id: 'aula', title: 'Aula / Faculdade', icon: 'GraduationCap', color: 'orange' },
-    { id: 'trabalho', title: 'Trabalho / Empresa', icon: 'Briefcase', color: 'indigo' },
+    { id: 'pausa', title: 'Café / Pausa', icon: 'Coffee', color: 'rose' },
+    { id: 'trabalho', title: 'Trabalho', icon: 'Briefcase', color: 'indigo' },
     { id: 'estudo', title: 'Estudo / Foco', icon: 'BookOpen', color: 'cyan' },
-    { id: 'pausa', title: 'Pausa / Café', icon: 'Coffee', color: 'rose' },
+    { id: 'aula', title: 'Faculdade / Aula', icon: 'GraduationCap', color: 'orange' },
     { id: 'treino', title: 'Treino / Academia', icon: 'Dumbbell', color: 'teal' },
-    { id: 'tarefas', title: 'Organização / Casa', icon: 'Sparkles', color: 'amber' },
-    { id: 'leitura', title: 'Leitura / Estudo', icon: 'Laptop', color: 'indigo' },
+    { id: 'trajeto', title: 'Deslocamento', icon: 'Bus', color: 'emerald' },
     { id: 'pedal', title: 'Caminhada / Pedal', icon: 'Bike', color: 'emerald' },
+    { id: 'tarefas', title: 'Casa / Organização', icon: 'Flame', color: 'amber' },
+    { id: 'leitura', title: 'Leitura', icon: 'Laptop', color: 'indigo' },
     { id: 'social', title: 'Social / Amigos', icon: 'Smile', color: 'orange' },
-    { id: 'lazer', title: 'Lazer / Games', icon: 'Gamepad2', color: 'rose' },
-    { id: 'musica', title: 'Relaxar / Música', icon: 'Music', color: 'violet' },
+    { id: 'lazer', title: 'Lazer / Jogos', icon: 'Gamepad2', color: 'rose' },
 ];
 
 const DAYS_LIST = [
