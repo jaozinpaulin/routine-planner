@@ -38,11 +38,11 @@ export default function CreateBlockModal({ isOpen, onClose, onSave, dayLabel }) 
     return (
         <div
             onClick={onClose}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto transition-opacity duration-300"
+            className="fixed inset-0 z-50 flex items-start pt-6 sm:items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs print:hidden overflow-y-auto transition-opacity duration-300"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full sm:max-w-md bg-[#121214] border-t sm:border border-zinc-800 rounded-t-2xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 max-h-[85dvh] sm:max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out translate-y-0"
+                className="w-full sm:max-w-md bg-[#121214] border border-zinc-800 rounded-2xl p-5 sm:p-6 shadow-2xl space-y-3 max-h-[85dvh] sm:max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out translate-y-0"
             >
                 <div className="flex items-center justify-between pb-2 border-b border-zinc-800 shrink-0">
                     <div>

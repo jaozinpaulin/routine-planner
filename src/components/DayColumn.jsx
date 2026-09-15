@@ -230,8 +230,7 @@ export default function DayColumn({
                     )}
                 </div>
 
-                <div className="flex items-center gap-0.5 sm:gap-1 print:hidden relative">
-                    {/* Botão e Menu Absoluto de Limpar Dia (Trash2 maior) */}
+                <div className="flex items-center gap-3 sm:gap-4 print:hidden relative">
                     {totalBlocks > 0 && (
                         <div className="relative" ref={clearMenuRef}>
                             <button
@@ -244,7 +243,7 @@ export default function DayColumn({
                                 className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer ${showClearMenu ? 'text-red-400 bg-zinc-800' : 'text-zinc-400 hover:text-red-400 hover:bg-zinc-800/70'
                                     }`}
                             >
-                                <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                                <Trash2 className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                             </button>
 
                             {showClearMenu && (
@@ -280,7 +279,7 @@ export default function DayColumn({
                         className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer ${isTargeted ? 'text-[#d97757] bg-[#d97757]/15' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                             }`}
                     >
-                        <Pin className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isTargeted ? 'fill-current' : ''}`} />
+                        <Pin className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${isTargeted ? 'fill-current' : ''}`} />
                     </button>
 
                     <div className="relative" ref={copyMenuRef}>
@@ -294,7 +293,7 @@ export default function DayColumn({
                             className={`p-1.5 sm:p-2 rounded-lg transition-colors cursor-pointer ${showCopyMenu ? 'text-zinc-100 bg-zinc-800' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/70'
                                 }`}
                         >
-                            <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <Copy className="w-[18px] h-[18px] sm:w-5 sm:h-5" />
                         </button>
 
                         {showCopyMenu && (
@@ -330,21 +329,20 @@ export default function DayColumn({
                                     disabled={selectedTargets.length === 0}
                                     className="w-full py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 text-zinc-200 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                                 >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="w-4 h-4" />
                                     Aplicar
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    {/* Botão Plus destacado: maior e com a cor do projeto (#d97757) */}
                     <button
                         type="button"
                         onClick={() => onAddClick && onAddClick(dayKey)}
                         title="Adicionar atividade"
                         className="p-1.5 sm:p-2 text-[#d97757] hover:bg-[#d97757]/15 rounded-lg transition-colors cursor-pointer"
                     >
-                        <Plus className="w-4 h-4 sm:w-[20px] sm:h-[20px] stroke-[2.5]" />
+                        <Plus className="w-5 h-5 sm:w-[22px] sm:h-[22px] stroke-[2.75]" />
                     </button>
                 </div>
             </div>
