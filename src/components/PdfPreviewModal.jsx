@@ -43,24 +43,45 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                 cacheBust: true,
             });
 
-            const elementWidth = element.offsetWidth;
-            const elementHeight = element.offsetHeight;
+            const imgWidth = element.offsetWidth;
+            const imgHeight = element.offsetHeight;
 
-            const pdfWidth = 297;
-            const calculatedHeight = (elementHeight * pdfWidth) / elementWidth;
+            const pdfWidth = 297; // A4 Paisagem (mm)
+            const pdfHeight = 210; // A4 Altura exata em mm
+
+            const ratio = pdfWidth / imgWidth;
+            const totalPdfHeight = imgHeight * ratio;
 
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'mm',
-                format: [pdfWidth, Math.max(calculatedHeight, 210)],
+                format: 'a4',
             });
 
-            const pageW = pdf.internal.pageSize.getWidth();
-            const pageH = pdf.internal.pageSize.getHeight();
+            const pageBgColor = isLightMode ? [255, 255, 255] : [18, 18, 20];
 
-            pdf.setFillColor(isLightMode ? 255 : 18, isLightMode ? 255 : 18, isLightMode ? 255 : 20);
-            pdf.rect(0, 0, pageW, pageH, 'F');
-            pdf.addImage(imgData, 'PNG', 0, 0, pageW, calculatedHeight, undefined, 'FAST');
+            let heightLeft = totalPdfHeight;
+            let position = 0;
+            let pageNum = 1;
+
+            // Adicionamos uma margem de segurança de corte para evitar fatiar em cima de bordas de cards
+            const sliceHeight = pdfHeight;
+
+            while (heightLeft > 0) {
+                if (pageNum > 1) {
+                    pdf.addPage();
+                }
+
+                pdf.setFillColor(pageBgColor[0], pageBgColor[1], pageBgColor[2]);
+                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+
+                // Desenha a imagem deslocada para a página atual
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, totalPdfHeight, undefined, 'FAST');
+
+                heightLeft -= sliceHeight;
+                position -= sliceHeight;
+                pageNum++;
+            }
 
             const blob = pdf.output('blob');
             const blobUrl = URL.createObjectURL(blob);
@@ -114,11 +135,10 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
 
     return (
         <div onClick={onClose}
-            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-5 bg-black/85 backdrop-blur-sm">
+            className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-black/85 backdrop-blur-sm">
             <div onClick={(e) => e.stopPropagation()}
                 className="w-full max-w-5xl bg-[#161618] border border-zinc-800 rounded-2xl flex flex-col max-h-[96vh] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
 
-                {/* Header Otimizado para Mobile */}
                 <div className="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-zinc-800 bg-[#141416] shrink-0">
                     <div className="min-w-0 flex items-center gap-2">
                         <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hidden sm:block">
@@ -129,6 +149,9 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                 <h3 className="text-xs sm:text-sm font-semibold text-zinc-100 truncate">
                                     Visualização
                                 </h3>
+                                <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full bg-[#d97757]/20 text-[#d97757] font-mono shrink-0">
+                                    Paisagem
+                                </span>
                             </div>
                             <p className="text-[10px] text-zinc-400 truncate hidden sm:block">
                                 Confira a diagramação antes de exportar
@@ -222,24 +245,24 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                             className="absolute top-0 left-0">
                             <div
                                 ref={printRef}
-                                style={{ width: '1060px', minHeight: '750px' }}
-                                className={`p-8 flex flex-col justify-between shadow-2xl rounded-2xl shrink-0 box-border select-none transition-colors duration-200 ${isLightMode
+                                style={{ width: '1060px', minHeight: 'auto' }}
+                                className={`px-2 py-1 flex flex-col justify-between shadow-2xl  shrink-0 box-border select-none transition-colors duration-200 ${isLightMode
                                     ? 'bg-white text-zinc-900 border border-zinc-200'
                                     : 'bg-[#121214] text-zinc-100 border border-zinc-800/80'
                                     }`}>
                                 <div>
-                                    <div className={`flex items-center justify-between pb-3.5 mb-4 border-b ${isLightMode ? 'border-zinc-200' : 'border-zinc-800'}`}>
+                                    <div className={`flex items-center justify-between pb-1 mb-3 border-b ${isLightMode ? 'border-zinc-200' : 'border-zinc-800'}`}>
                                         <div>
-                                            <h1 className={`text-xl font-bold tracking-tight flex items-center gap-2 ${isLightMode ? 'text-zinc-900' : 'text-zinc-100'}`}>
+                                            <h1 className={`text-lg font-bold tracking-tight flex items-center gap-2 ${isLightMode ? 'text-zinc-900' : 'text-zinc-100'}`}>
                                                 Cronograma Semanal de Rotina
                                                 <span className="w-2 h-2 rounded-full bg-[#d97757]" />
                                             </h1>
-                                            <p className={`text-xs mt-0.5 ${isLightMode ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                                            <p className={`text-[11px] mt-0.5 ${isLightMode ? 'text-zinc-500' : 'text-zinc-400'}`}>
                                                 Planejamento semanal de tempo e atividades
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <span className={`text-[10px] font-mono uppercase tracking-wider block ${isLightMode ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                                            <span className={`text-[9px] font-mono uppercase tracking-wider block ${isLightMode ? 'text-zinc-400' : 'text-zinc-500'}`}>
                                                 Formato
                                             </span>
                                             <span className={`text-xs font-semibold ${isLightMode ? 'text-zinc-700' : 'text-zinc-300'}`}>
@@ -248,7 +271,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                         </div>
                                     </div>
 
-                                    <div className={`grid gap-2.5 items-start ${is7Days ? 'grid-cols-7' : 'grid-cols-5'}`}>
+                                    <div className={`grid gap-2 items-start ${is7Days ? 'grid-cols-7' : 'grid-cols-5'}`}>
                                         {activeDays.map((day) => {
                                             const blocks = schedule[day.key] || [];
                                             const isWeekend = day.key === 'sab' || day.key === 'dom';
@@ -269,7 +292,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                                 ? 'bg-white border-zinc-200 shadow-xs'
                                                                 : 'bg-zinc-900/50 border-zinc-800/90'
                                                         }`}>
-                                                    <div className={`px-3 py-2 border-b rounded-t-xl flex items-center justify-between shrink-0 ${isLightMode
+                                                    <div className={`px-2.5 py-1.5 border-b rounded-t-xl flex items-center justify-between shrink-0 ${isLightMode
                                                         ? isTarget ? 'bg-zinc-200/80 border-zinc-300' : 'bg-zinc-100/80 border-zinc-200'
                                                         : isTarget ? 'bg-zinc-900/80 border-[#d97757]/30' : 'bg-zinc-950/40 border-zinc-800/80'
                                                         }`}>
@@ -288,9 +311,9 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                         )}
                                                     </div>
 
-                                                    <div className="p-1.5 flex flex-col gap-1.5">
+                                                    <div className="p-1 flex flex-col gap-1">
                                                         {blocks.length === 0 ? (
-                                                            <div className="py-4 flex items-center justify-center">
+                                                            <div className="py-3 flex items-center justify-center">
                                                                 <span className={`text-[10px] font-mono ${isLightMode ? 'text-zinc-400' : 'text-zinc-600'}`}>
                                                                     Sem atividades
                                                                 </span>
@@ -303,22 +326,22 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                                                 return (
                                                                     <div
                                                                         key={block.id}
-                                                                        className={`relative p-2 rounded-lg border flex flex-col justify-between min-h-[46px] overflow-hidden shrink-0 ${isLightMode
+                                                                        className={`relative p-1.5 rounded-lg border flex flex-col justify-between min-h-[36px] overflow-hidden shrink-0 ${isLightMode
                                                                             ? 'bg-white border-zinc-200 shadow-2xs'
                                                                             : 'border-zinc-800 bg-zinc-900/90'
                                                                             }`}>
-                                                                        <div className={`absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none ${isLightMode ? 'opacity-90' : 'opacity-80'}`}>
-                                                                            <IconComp strokeWidth={1.8} className={`w-4 h-4 ${theme.icon}`} />
+                                                                        <div className={`absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none ${isLightMode ? 'opacity-90' : 'opacity-80'}`}>
+                                                                            <IconComp strokeWidth={1.8} className={`w-3.5 h-3.5 ${theme.icon}`} />
                                                                         </div>
 
-                                                                        <div className="flex items-center gap-1.5 relative z-10">
+                                                                        <div className="flex items-center gap-1 relative z-10">
                                                                             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${theme.dot}`} />
-                                                                            <span className={`text-[8.5px] font-mono font-medium ${isLightMode ? 'text-zinc-600 font-semibold' : 'text-zinc-400'}`}>
+                                                                            <span className={`text-[8px] font-mono font-medium ${isLightMode ? 'text-zinc-600 font-semibold' : 'text-zinc-400'}`}>
                                                                                 {block.start} - {block.end}
                                                                             </span>
                                                                         </div>
 
-                                                                        <span className={`text-[10px] font-medium leading-tight line-clamp-1 pr-5 relative z-10 mt-0.5 ${isLightMode ? 'text-zinc-900 font-bold' : 'text-zinc-200'}`}>
+                                                                        <span className={`text-[9px] font-medium leading-tight line-clamp-1 pr-4 relative z-10 mt-0.5 ${isLightMode ? 'text-zinc-900 font-bold' : 'text-zinc-200'}`}>
                                                                             {block.title}
                                                                         </span>
                                                                     </div>
@@ -332,7 +355,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                                     </div>
                                 </div>
 
-                                <div className={`pt-4 mt-4 border-t flex items-center justify-between text-[10px] shrink-0 ${isLightMode ? 'border-zinc-200 text-zinc-400' : 'border-zinc-800/80 text-zinc-500'}`}>
+                                <div className={`pt-2.5 mt-2.5 border-t flex items-center justify-between text-[8px] shrink-0 ${isLightMode ? 'border-zinc-200/60 text-zinc-400/60' : 'border-zinc-800/60 text-zinc-500/60'}`}>
                                     <span>Routine Planner</span>
                                     <span>github.com/jaozinpaulin</span>
                                 </div>
