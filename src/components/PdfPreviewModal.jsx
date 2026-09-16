@@ -246,7 +246,7 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                             <div
                                 ref={printRef}
                                 style={{ width: '1060px', minHeight: 'auto' }}
-                                className={`px-2 py-1 flex flex-col justify-between shadow-2xl  shrink-0 box-border select-none transition-colors duration-200 ${isLightMode
+                                className={`px-5  py-1 sm:py-1 flex flex-col justify-between shadow-2xl  shrink-0 box-border select-none transition-colors duration-200 ${isLightMode
                                     ? 'bg-white text-zinc-900 border border-zinc-200'
                                     : 'bg-[#121214] text-zinc-100 border border-zinc-800/80'
                                     }`}>
