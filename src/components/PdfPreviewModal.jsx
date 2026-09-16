@@ -46,8 +46,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
             const imgWidth = element.offsetWidth;
             const imgHeight = element.offsetHeight;
 
-            const pdfWidth = 297; // A4 Paisagem (mm)
-            const pdfHeight = 210; // A4 Altura exata em mm
+            const pdfWidth = 297;
+            const pdfHeight = 210;
 
             const ratio = pdfWidth / imgWidth;
             const totalPdfHeight = imgHeight * ratio;
@@ -64,8 +64,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
             let position = 0;
             let pageNum = 1;
 
-            // Adicionamos uma margem de segurança de corte para evitar fatiar em cima de bordas de cards
-            const sliceHeight = pdfHeight;
+            const overlap = 0.5;
+            const sliceHeight = pdfHeight - overlap;
 
             while (heightLeft > 0) {
                 if (pageNum > 1) {
@@ -73,9 +73,8 @@ export default function PdfPreviewModal({ isOpen, onClose, activeDays, schedule,
                 }
 
                 pdf.setFillColor(pageBgColor[0], pageBgColor[1], pageBgColor[2]);
-                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                pdf.rect(0, 0, pdfWidth, pdfHeight + 1, 'F');
 
-                // Desenha a imagem deslocada para a página atual
                 pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, totalPdfHeight, undefined, 'FAST');
 
                 heightLeft -= sliceHeight;
